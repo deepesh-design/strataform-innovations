@@ -1291,16 +1291,16 @@
 <!-- ════════════════ NAVBAR ════════════════ -->
 <div class="navbar-outer">
   <nav class="navbar">
-    <a href="#" class="nav-brand">
+    <a href="index.html" class="nav-brand">
       <img class="logo-img" src="images/Strataform Light.svg" alt="Strataform Innovations" />
     </a>
 
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#services">Services</a></li>
-        <li><a href="#about">About Us</a></li>
         <li><a href="#process">Process</a></li>
         <li><a href="#materials">Materials</a></li>
+        <li><a href="#about">About Us</a></li>
         <li><a href="#contact" class="btn btn-primary nav-cta">Contact Us</a></li>
       </ul>
 
@@ -1318,9 +1318,9 @@
   </button>
   <nav class="mobile-menu-links">
     <a href="#services">Services</a>
-    <a href="#about">About Us</a>
     <a href="#process">Process</a>
     <a href="#materials">Materials</a>
+    <a href="#about">About Us</a>
     <a href="#contact" class="btn btn-primary">Contact Us</a>
   </nav>
 </div>
@@ -1660,9 +1660,9 @@
 
     <ul class="footer-nav">
       <li><a href="#services">Services</a></li>
-      <li><a href="#about">About Us</a></li>
       <li><a href="#process">Process</a></li>
       <li><a href="#materials">Materials</a></li>
+      <li><a href="#about">About Us</a></li>
       <li><a href="#contact">Contact Us</a></li>
     </ul>
   </div>
@@ -1796,7 +1796,7 @@
   // Sections between two nav-linked anchors (e.g. Work/FAQ, which have no
   // nav item of their own) stay attributed to the nav item right above them.
   (function () {
-    var ids = ['services', 'about', 'process', 'materials', 'contact'];
+    var ids = ['services', 'process', 'materials', 'about', 'contact'];
     var navbarOuter = document.querySelector('.navbar-outer');
 
     function cumulativeOffsetTop(el) {
@@ -1820,7 +1820,9 @@
     function updateActive() {
       var navH = navbarOuter ? navbarOuter.getBoundingClientRect().height : 0;
       var scrollPos = window.scrollY + navH + 24;
-      var current = sections[0];
+      // Stays null while still in the hero, above the first section — no nav
+      // item should light up until the user actually reaches one.
+      var current = null;
       sections.forEach(function (s) {
         if (cumulativeOffsetTop(s.el) <= scrollPos) current = s;
       });
