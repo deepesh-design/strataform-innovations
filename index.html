@@ -665,6 +665,23 @@
       justify-content: center;
     }
 
+    .req-star { color: var(--orange); margin-left: 3px; }
+
+    .form-field input.is-invalid,
+    .form-field textarea.is-invalid,
+    .custom-select-trigger.is-invalid {
+      border-color: var(--orange) !important;
+    }
+
+    .form-error {
+      font-size: 13px;
+      color: var(--orange);
+      margin-top: 8px;
+      display: none;
+    }
+
+    .form-error.is-visible { display: block; }
+
     .form-field input {
       width: 100%;
       padding: 16px 16px;
@@ -1094,12 +1111,19 @@
 
     .contact-form-wrap { position: relative; }
 
+    /* Wraps the form + success overlay so the card's height always follows
+       the (always-present) form — the success state covers it in place
+       instead of swapping it out, so nothing around it ever jumps. */
+    .contact-form-inner {
+      position: relative;
+      z-index: 1;
+    }
+
     .contact-form-wrap form {
       text-align: left;
       background: #fff;
       padding: 40px;
       position: relative;
-      z-index: 1;
     }
 
     /* Decorative filament spool "hanging" beside the form card */
@@ -1153,10 +1177,25 @@
     .dropzone-hint { font-size: 12px; color: var(--label); }
 
     .form-success {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
       padding: 48px 24px;
       border: 1px solid var(--line);
-      background: var(--grey-bg);
+      background: #fff;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+
+    .form-success.is-visible {
+      opacity: 1;
+      visibility: visible;
     }
 
     .form-success h3 {
@@ -1169,7 +1208,80 @@
     .form-success p {
       font-size: 15px;
       color: var(--muted);
+      max-width: 360px;
     }
+
+    /* ─── FILE CHIPS (selected model files) ─── */
+    .file-chip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .file-chip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--grey-bg);
+      border: 1px solid var(--line);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
+    .file-chip-icon {
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--orange);
+    }
+
+    .file-chip-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .file-chip-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-chip-meta {
+      font-size: 11.5px;
+      color: var(--label);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .file-chip-remove {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+
+    .file-chip-remove:hover { color: var(--orange); }
 
     .custom-select { position: relative; width: 100%; font-family: 'Maven Pro', sans-serif; }
 
@@ -1191,6 +1303,7 @@
 
     .custom-select-trigger:hover { border-color: #bbb; }
     .custom-select.open .custom-select-trigger { border-color: var(--ink); }
+    .custom-select-value.is-placeholder { color: #bbb; }
 
     .custom-select-arrow {
       flex-shrink: 0;
@@ -1629,63 +1742,67 @@
     <div class="contact-form-wrap">
       <img class="contact-deco-img" src="images/Filament spool.webp" alt="Filament spool" />
 
-      <div class="form-success" id="formSuccess" style="display:none;">
-        <h3>Request sent</h3>
-        <p>Thanks — we've got your project details and will reply within 1 business day.</p>
+      <div class="contact-form-inner">
+        <form id="contactForm" action="https://formsubmit.co/admin@strataform.in" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="_subject" value="New project request — Strataform website" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_next" value="https://strataform.in/?sent=true#contact" />
+          <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+
+          <div class="form-row">
+            <div class="form-field">
+              <label><span>Name<span class="req-star">*</span></span></label>
+              <input type="text" name="name" placeholder="Your name" required />
+            </div>
+            <div class="form-field">
+              <label>Phone</label>
+              <input type="tel" name="phone" placeholder="Optional" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label><span>Email<span class="req-star">*</span></span></label>
+            <input type="email" name="email" placeholder="email@website.com" required />
+          </div>
+          <div class="form-field">
+            <label><span>Service<span class="req-star">*</span></span></label>
+            <div class="custom-select" id="serviceSelect">
+              <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="custom-select-value is-placeholder">Select one</span>
+                <svg class="custom-select-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <ul class="custom-select-list" role="listbox">
+                <li class="custom-select-option" role="option" data-value="3D Printing">3D Printing</li>
+                <li class="custom-select-option" role="option" data-value="3D Modeling">3D Modeling</li>
+                <li class="custom-select-option" role="option" data-value="Modeling + Printing">Modeling + Printing</li>
+                <li class="custom-select-option" role="option" data-value="Production run">Production run</li>
+                <li class="custom-select-option" role="option" data-value="Not sure yet">Not sure yet</li>
+              </ul>
+              <input type="hidden" name="service" value="" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label><span>Project details<span class="req-star">*</span></span></label>
+            <textarea rows="4" name="message" placeholder="Tell us what you want to make, quantity, material, deadline..." required></textarea>
+          </div>
+          <div class="form-field">
+            <label>Model file</label>
+            <label class="dropzone">
+              <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
+              <span class="dropzone-label" id="dropzoneLabel">Drop your model here</span>
+              <span class="dropzone-hint">STL, OBJ, STEP or 3MF · drag &amp; drop or click · multiple files ok</span>
+              <input type="file" name="attachment" accept=".stl,.obj,.step,.stp,.3mf" multiple style="display:none" />
+            </label>
+            <div class="file-chip-list" id="fileChipList"></div>
+          </div>
+          <div class="form-error" id="formError">Please fill in all required fields before sending.</div>
+          <button type="submit" class="btn btn-primary" style="margin-top:8px;">Send request →</button>
+        </form>
+
+        <div class="form-success" id="formSuccess">
+          <h3>Request sent</h3>
+          <p>Thanks — we've got your project details and will reply within 1 business day.</p>
+        </div>
       </div>
-
-      <form id="contactForm" action="https://formsubmit.co/admin@strataform.in" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="_subject" value="New project request — Strataform website" />
-        <input type="hidden" name="_template" value="table" />
-        <input type="hidden" name="_next" value="https://strataform.in/?sent=true#contact" />
-        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
-
-        <div class="form-row">
-          <div class="form-field">
-            <label>Name</label>
-            <input type="text" name="name" placeholder="Your name" required />
-          </div>
-          <div class="form-field">
-            <label>Phone</label>
-            <input type="tel" name="phone" placeholder="Optional" />
-          </div>
-        </div>
-        <div class="form-field">
-          <label>Email</label>
-          <input type="email" name="email" placeholder="email@website.com" required />
-        </div>
-        <div class="form-field">
-          <label>Service</label>
-          <div class="custom-select" id="serviceSelect">
-            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
-              <span class="custom-select-value">3D Printing</span>
-              <svg class="custom-select-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-            <ul class="custom-select-list" role="listbox">
-              <li class="custom-select-option selected" role="option" data-value="3D Printing">3D Printing</li>
-              <li class="custom-select-option" role="option" data-value="3D Modeling">3D Modeling</li>
-              <li class="custom-select-option" role="option" data-value="Modeling + Printing">Modeling + Printing</li>
-              <li class="custom-select-option" role="option" data-value="Production run">Production run</li>
-              <li class="custom-select-option" role="option" data-value="Not sure yet">Not sure yet</li>
-            </ul>
-            <input type="hidden" name="service" value="3D Printing" />
-          </div>
-        </div>
-        <div class="form-field">
-          <label>Project details</label>
-          <textarea rows="4" name="message" placeholder="Tell us what you want to make, quantity, material, deadline..."></textarea>
-        </div>
-        <div class="form-field">
-          <label>Model file</label>
-          <label class="dropzone">
-            <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
-            <span class="dropzone-label" id="dropzoneLabel">Drop your model here</span>
-            <span class="dropzone-hint">STL, OBJ, STEP or 3MF · drag &amp; drop or click</span>
-            <input type="file" name="attachment" accept=".stl,.obj,.step,.stp,.3mf" style="display:none" />
-          </label>
-        </div>
-        <button type="submit" class="btn btn-primary" style="margin-top:8px;">Send request →</button>
-      </form>
     </div>
   </div>
  </div>
@@ -2054,7 +2171,9 @@
         options.forEach(function (o) { o.classList.remove('selected'); });
         opt.classList.add('selected');
         valueEl.textContent = opt.getAttribute('data-value');
+        valueEl.classList.remove('is-placeholder');
         if (hiddenInput) hiddenInput.value = opt.getAttribute('data-value');
+        trigger.classList.remove('is-invalid');
         closeSelect();
       });
     });
@@ -2074,24 +2193,181 @@
     var success = document.getElementById('formSuccess');
     if (!form || !success) return;
 
-    // FormSubmit redirects back here with ?sent=true once the email is
-    // actually delivered, so we only show the confirmation after a real send.
-    if (/[?&]sent=true\b/.test(window.location.search)) {
-      form.style.display = 'none';
-      success.style.display = 'block';
-      var cleanUrl = window.location.pathname + window.location.hash;
-      history.replaceState(null, '', cleanUrl);
+    var nameInput = form.querySelector('input[name="name"]');
+    var emailInput = form.querySelector('input[name="email"]');
+    var messageInput = form.querySelector('textarea[name="message"]');
+    var serviceHidden = form.querySelector('input[name="service"]');
+    var serviceTrigger = form.querySelector('.custom-select-trigger');
+    var serviceValueEl = form.querySelector('.custom-select-value');
+    var serviceOptions = form.querySelectorAll('.custom-select-option');
+    var errorBanner = document.getElementById('formError');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var honeyInput = form.querySelector('input[name="_honey"]');
+
+    function showSuccess() {
+      success.classList.add('is-visible');
     }
 
+    // Progressive-enhancement fallback: if JS submission below never runs
+    // (e.g. fetch blocked), the plain form POST still works and FormSubmit
+    // redirects back here with ?sent=true once the email is actually sent.
+    if (/[?&]sent=true\b/.test(window.location.search)) {
+      showSuccess();
+      history.replaceState(null, '', window.location.pathname + window.location.hash);
+    }
+
+    // ── Model file chips (supports multiple files + removal) ──
     var fileInput = form.querySelector('input[type="file"]');
-    var dropzoneLabel = document.getElementById('dropzoneLabel');
-    if (fileInput && dropzoneLabel) {
-      fileInput.addEventListener('change', function () {
-        dropzoneLabel.textContent = fileInput.files.length
-          ? fileInput.files[0].name
-          : 'Drop your model here';
+    var fileChipList = document.getElementById('fileChipList');
+    var selectedFiles = [];
+
+    var FILE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>';
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function fileExt(name) {
+      var parts = name.split('.');
+      return parts.length > 1 ? parts.pop().toUpperCase() : 'FILE';
+    }
+
+    function syncFileInput() {
+      var dt = new DataTransfer();
+      selectedFiles.forEach(function (f) { dt.items.add(f); });
+      fileInput.files = dt.files;
+    }
+
+    function renderChips() {
+      if (!fileChipList) return;
+      fileChipList.innerHTML = '';
+      selectedFiles.forEach(function (file, idx) {
+        var chip = document.createElement('div');
+        chip.className = 'file-chip';
+        chip.innerHTML =
+          '<span class="file-chip-icon">' + FILE_ICON + '</span>' +
+          '<span class="file-chip-info">' +
+            '<span class="file-chip-name"></span>' +
+            '<span class="file-chip-meta"></span>' +
+          '</span>' +
+          '<button type="button" class="file-chip-remove" aria-label="Remove file">&times;</button>';
+        chip.querySelector('.file-chip-name').textContent = file.name;
+        chip.querySelector('.file-chip-meta').textContent = fileExt(file.name) + ' · ' + formatBytes(file.size);
+        chip.querySelector('.file-chip-remove').addEventListener('click', function () {
+          selectedFiles.splice(idx, 1);
+          syncFileInput();
+          renderChips();
+        });
+        fileChipList.appendChild(chip);
       });
     }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', function () {
+        selectedFiles = Array.prototype.slice.call(fileInput.files);
+        renderChips();
+      });
+    }
+
+    // ── Validation + submit ──
+    function validate() {
+      var valid = true;
+      var firstInvalid = null;
+
+      [nameInput, emailInput, messageInput].forEach(function (el) {
+        var ok = el.checkValidity();
+        el.classList.toggle('is-invalid', !ok);
+        if (!ok && !firstInvalid) firstInvalid = el;
+        if (!ok) valid = false;
+      });
+
+      var serviceOk = !!(serviceHidden && serviceHidden.value);
+      if (serviceTrigger) serviceTrigger.classList.toggle('is-invalid', !serviceOk);
+      if (!serviceOk) {
+        valid = false;
+        if (!firstInvalid) firstInvalid = serviceTrigger;
+      }
+
+      return { valid: valid, firstInvalid: firstInvalid };
+    }
+
+    [nameInput, emailInput, messageInput].forEach(function (el) {
+      el.addEventListener('input', function () { el.classList.remove('is-invalid'); });
+    });
+
+    function resetServiceField() {
+      if (!serviceValueEl) return;
+      serviceValueEl.textContent = 'Select one';
+      serviceValueEl.classList.add('is-placeholder');
+      serviceOptions.forEach(function (o) { o.classList.remove('selected'); });
+      if (serviceTrigger) serviceTrigger.classList.remove('is-invalid');
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      errorBanner.classList.remove('is-visible');
+
+      // Honeypot: real users never fill this (it's visually hidden); if it
+      // has a value, silently pretend success instead of actually sending.
+      if (honeyInput && honeyInput.value) {
+        showSuccess();
+        form.reset();
+        selectedFiles = [];
+        renderChips();
+        resetServiceField();
+        return;
+      }
+
+      var result = validate();
+      if (!result.valid) {
+        errorBanner.textContent = 'Please fill in all required fields before sending.';
+        errorBanner.classList.add('is-visible');
+        if (result.firstInvalid) result.firstInvalid.focus();
+        return;
+      }
+
+      var originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      var formData = new FormData(form);
+
+      fetch('https://formsubmit.co/ajax/admin@strataform.in', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Request failed');
+          return res.json();
+        })
+        .then(function (data) {
+          // FormSubmit always answers 200, even when it didn't actually send
+          // (e.g. the destination inbox hasn't clicked its one-time
+          // activation link yet) — the real outcome is in data.success.
+          if (data && (data.success === true || data.success === 'true')) {
+            showSuccess();
+            form.reset();
+            selectedFiles = [];
+            renderChips();
+            resetServiceField();
+          } else {
+            errorBanner.textContent = (data && data.message) ||
+              'Something went wrong sending your request — please try again, or email us directly at admin@strataform.in.';
+            errorBanner.classList.add('is-visible');
+          }
+        })
+        .catch(function () {
+          errorBanner.textContent = 'Something went wrong sending your request — please try again, or email us directly at admin@strataform.in.';
+          errorBanner.classList.add('is-visible');
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        });
+    });
   })();
 
   // ─── FAQ ACCORDION ───
