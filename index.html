@@ -1262,8 +1262,16 @@
     @media (max-width: 640px) {
       .container { width: 100%; padding: 0 20px; box-sizing: border-box; }
       .navbar { width: 100%; padding: 0 20px; box-sizing: border-box; }
-      .hero { padding-left: 20px; padding-right: 20px; }
-      .hero-img-wrap { width: 100%; padding: 0 20px; box-sizing: border-box; }
+      .hero { padding-left: 20px; padding-right: 20px; overflow-x: hidden; }
+      /* Intentional edge-to-edge bleed: image runs 20% wider than the
+         viewport, overflowing evenly past both sides. */
+      .hero-img-wrap {
+        width: 120vw;
+        max-width: 120vw;
+        margin-left: 50%;
+        transform: translateX(-50%);
+        padding: 0;
+      }
     }
   </style>
 </head>
