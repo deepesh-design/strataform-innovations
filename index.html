@@ -665,13 +665,13 @@
       justify-content: center;
     }
 
-    .req-text {
-      color: var(--orange);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      margin-left: 6px;
+    .optional-text {
+      color: var(--label);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 5px;
     }
 
     .form-field input.is-invalid,
@@ -688,6 +688,15 @@
     }
 
     .form-error.is-visible { display: block; }
+
+    .field-error {
+      font-size: 12.5px;
+      color: var(--orange);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .field-error.is-visible { display: block; }
 
     .form-field input {
       width: 100%;
@@ -1781,20 +1790,22 @@
 
           <div class="form-row">
             <div class="form-field">
-              <label><span>Name<span class="req-text">Required</span></span></label>
-              <input type="text" name="name" placeholder="Your name" required />
+              <label>Name</label>
+              <input type="text" name="name" placeholder="Your name" />
+              <div class="field-error" id="nameFieldError"></div>
             </div>
             <div class="form-field">
-              <label>Phone</label>
+              <label><span>Phone<span class="optional-text">(optional)</span></span></label>
               <input type="tel" name="phone" placeholder="Optional" />
             </div>
           </div>
           <div class="form-field">
-            <label><span>Email<span class="req-text">Required</span></span></label>
-            <input type="email" name="email" placeholder="email@website.com" required />
+            <label>Email</label>
+            <input type="email" name="email" placeholder="email@website.com" />
+            <div class="field-error" id="emailFieldError"></div>
           </div>
           <div class="form-field">
-            <label><span>Service<span class="req-text">Required</span></span></label>
+            <label>Service</label>
             <div class="custom-select" id="serviceSelect">
               <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
                 <span class="custom-select-value is-placeholder">Select one</span>
@@ -1807,15 +1818,17 @@
                 <li class="custom-select-option" role="option" data-value="Production run">Production run</li>
                 <li class="custom-select-option" role="option" data-value="Not sure yet">Not sure yet</li>
               </ul>
-              <input type="hidden" name="service" value="" required />
+              <input type="hidden" name="service" value="" />
             </div>
+            <div class="field-error" id="serviceFieldError"></div>
           </div>
           <div class="form-field">
-            <label><span>Project details<span class="req-text">Required</span></span></label>
-            <textarea rows="4" name="message" placeholder="Tell us what you want to make, quantity, material, deadline..." required></textarea>
+            <label>Project details</label>
+            <textarea rows="4" name="message" placeholder="Tell us what you want to make, quantity, material, deadline..."></textarea>
+            <div class="field-error" id="messageFieldError"></div>
           </div>
           <div class="form-field">
-            <label>Model file</label>
+            <label><span>Attach files<span class="optional-text">(optional)</span></span></label>
             <label class="dropzone">
               <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
               <span class="dropzone-label" id="dropzoneLabel">Drop your model here</span>
@@ -2235,6 +2248,11 @@
     var submitBtn = form.querySelector('button[type="submit"]');
     var honeyInput = form.querySelector('input[name="_honey"]');
 
+    var nameFieldError = document.getElementById('nameFieldError');
+    var emailFieldError = document.getElementById('emailFieldError');
+    var messageFieldError = document.getElementById('messageFieldError');
+    var serviceFieldError = document.getElementById('serviceFieldError');
+
     function showSuccess() {
       success.classList.add('is-visible');
     }
@@ -2360,19 +2378,45 @@
     }
 
     // ── Validation + submit ──
+    // Native `required` isn't used here — every field gets a custom inline
+    // error message instead of the browser's own validation bubble.
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    function setFieldError(el, errorEl, message) {
+      el.classList.toggle('is-invalid', !!message);
+      if (errorEl) {
+        errorEl.textContent = message || '';
+        errorEl.classList.toggle('is-visible', !!message);
+      }
+    }
+
     function validate() {
       var valid = true;
       var firstInvalid = null;
 
-      [nameInput, emailInput, messageInput].forEach(function (el) {
-        var ok = el.checkValidity();
-        el.classList.toggle('is-invalid', !ok);
-        if (!ok && !firstInvalid) firstInvalid = el;
-        if (!ok) valid = false;
-      });
+      var nameEmpty = !nameInput.value.trim();
+      setFieldError(nameInput, nameFieldError, nameEmpty ? 'Please enter your name.' : '');
+      if (nameEmpty) { valid = false; firstInvalid = firstInvalid || nameInput; }
+
+      var emailValue = emailInput.value.trim();
+      var emailMsg = '';
+      if (!emailValue) emailMsg = 'Please enter your email.';
+      else if (!isValidEmail(emailValue)) emailMsg = 'Enter a valid email address.';
+      setFieldError(emailInput, emailFieldError, emailMsg);
+      if (emailMsg) { valid = false; firstInvalid = firstInvalid || emailInput; }
+
+      var messageEmpty = !messageInput.value.trim();
+      setFieldError(messageInput, messageFieldError, messageEmpty ? 'Please tell us about your project.' : '');
+      if (messageEmpty) { valid = false; firstInvalid = firstInvalid || messageInput; }
 
       var serviceOk = !!(serviceHidden && serviceHidden.value);
       if (serviceTrigger) serviceTrigger.classList.toggle('is-invalid', !serviceOk);
+      if (serviceFieldError) {
+        serviceFieldError.textContent = serviceOk ? '' : 'Please choose a service.';
+        serviceFieldError.classList.toggle('is-visible', !serviceOk);
+      }
       if (!serviceOk) {
         valid = false;
         if (!firstInvalid) firstInvalid = serviceTrigger;
@@ -2381,8 +2425,18 @@
       return { valid: valid, firstInvalid: firstInvalid };
     }
 
-    [nameInput, emailInput, messageInput].forEach(function (el) {
-      el.addEventListener('input', function () { el.classList.remove('is-invalid'); });
+    [
+      [nameInput, nameFieldError],
+      [emailInput, emailFieldError],
+      [messageInput, messageFieldError]
+    ].forEach(function (pair) {
+      pair[0].addEventListener('input', function () { setFieldError(pair[0], pair[1], ''); });
+    });
+
+    serviceOptions.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        if (serviceFieldError) serviceFieldError.classList.remove('is-visible');
+      });
     });
 
     function resetServiceField() {
@@ -2393,29 +2447,50 @@
       if (serviceTrigger) serviceTrigger.classList.remove('is-invalid');
     }
 
+    function resetAllFieldErrors() {
+      setFieldError(nameInput, nameFieldError, '');
+      setFieldError(emailInput, emailFieldError, '');
+      setFieldError(messageInput, messageFieldError, '');
+      if (serviceFieldError) serviceFieldError.classList.remove('is-visible');
+    }
+
     form.addEventListener('submit', function (e) {
-      e.preventDefault();
       errorBanner.classList.remove('is-visible');
 
       // Honeypot: real users never fill this (it's visually hidden); if it
       // has a value, silently pretend success instead of actually sending.
       if (honeyInput && honeyInput.value) {
+        e.preventDefault();
         showSuccess();
         form.reset();
         selectedFiles = [];
         renderChips();
         clearFileError();
         resetServiceField();
+        resetAllFieldErrors();
         return;
       }
 
       var result = validate();
       if (!result.valid) {
+        e.preventDefault();
         errorBanner.textContent = 'Please fill in all required fields before sending.';
         errorBanner.classList.add('is-visible');
         if (result.firstInvalid) result.firstInvalid.focus();
         return;
       }
+
+      // FormSubmit's AJAX endpoint doesn't support file attachments, so when
+      // files are attached we let the real (non-AJAX) form submission go
+      // through instead — it POSTs to FormSubmit and redirects back here via
+      // _next, which the ?sent=true handler above picks up.
+      if (selectedFiles.length > 0) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+        return;
+      }
+
+      e.preventDefault();
 
       var originalText = submitBtn.textContent;
       submitBtn.disabled = true;
@@ -2443,6 +2518,7 @@
             renderChips();
             clearFileError();
             resetServiceField();
+            resetAllFieldErrors();
           } else {
             errorBanner.textContent = (data && data.message) ||
               'Something went wrong sending your request — please try again, or email us directly at admin@strataform.in.';
