@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strataform Innovations — 3D Printing &amp; 3D Modeling</title>
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange: #ff5a1f;
+      --ink: #111111;
+      --grey-bg: #efeeee;
+      --line: #dcdcdc;
+      --muted: #4a4a4a;
+      --label: #666666;
+      --btn-cut: 18px;
+      --btn-border: #cfcfcf;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 16px;
+      color: var(--ink);
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── SHARED CONTAINER ─── */
+    .container {
+      width: 75%;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+      .container { width: 75%; }
+    }
+
+    /* ─── NAVBAR (sticky, full width) ─── */
+    /* Luxy.js sets position:fixed + width:100% on the wrapper via inline
+       style but never sets top/left, so without this rule the wrapper
+       anchors to its "static" position (below the navbar in flow) instead
+       of the true viewport top — permanently clipping content at the
+       bottom by roughly one navbar-height. */
+    #luxy {
+      top: 0;
+      left: 0;
+    }
+
+    .navbar-outer {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 300;
+      width: 100%;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+
+    .navbar {
+      width: 75%;
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      height: 30px;
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .navbar .logo-img { height: 44px; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: opacity 0.18s ease;
+    }
+
+    .nav-links a:not(.nav-cta):hover { opacity: 0.5; }
+
+    .nav-links a.nav-cta {
+      padding: 12px 24px;
+      font-size: 14px;
+      color: #fff;
+      background: var(--ink);
+      transition: background 0.25s ease;
+    }
+
+    .nav-links a.nav-cta:hover { background: #333; }
+
+    /* ─── HAMBURGER + FULL-SCREEN MOBILE MENU ─── */
+    .hamburger-btn {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 40px;
+      height: 40px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .hamburger-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--ink);
+      transition: transform 0.3s ease, opacity 0.2s ease;
+    }
+
+    /* Animate the three bars into an X while the menu is open */
+    .hamburger-btn[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger-btn[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .hamburger-btn[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mobile-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-20px) scale(0.98);
+      transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1), visibility 0s linear 0.35s;
+    }
+
+    .mobile-menu.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .mobile-menu-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .mobile-menu-links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .mobile-menu-links a {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--ink);
+    }
+
+    .mobile-menu-links a.btn {
+      margin-top: 16px;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    /* ─── BUTTONS (box shape, diagonal cut bottom-right) ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--btn-cut)), calc(100% - var(--btn-cut)) 100%, 0 100%);
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+
+    /* Primary (solid) buttons */
+    .btn-primary {
+      background: var(--ink);
+      color: #fff;
+      padding: 16px 32px;
+      transition: background 0.25s ease;
+    }
+    .btn-primary:hover { background: #333; }
+
+    /* Secondary (outline) buttons — border is drawn as a layered shape so the
+       stroke follows the diagonal cut too; orange fill slides in from the
+       bottom on hover, clipped to the same inner shape. */
+    .btn-secondary {
+      position: relative;
+      isolation: isolate;
+      z-index: 1;
+      background: var(--btn-border);
+      color: var(--ink);
+      padding: 16px 32px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-secondary::before,
+    .btn-secondary::after {
+      content: '';
+      position: absolute;
+      inset: 1.5px;
+      z-index: -1;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--btn-cut)), calc(100% - var(--btn-cut)) 100%, 0 100%);
+    }
+
+    .btn-secondary::before {
+      background: var(--grey-bg);
+    }
+
+    .btn-secondary::after {
+      height: 0%;
+      top: auto;
+      background: var(--orange);
+      transition: height 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .btn-secondary:hover {
+      color: #fff;
+      background: var(--orange);
+    }
+
+    .btn-secondary:hover::after { height: calc(100% - 3px); }
+
+    .btn-sm { font-size: 13.5px; padding: 16px 24px; }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: var(--grey-bg);
+      text-align: center;
+      padding: 96px 24px;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .hero h1 {
+      font-size: 104px;
+      font-weight: 800;
+      letter-spacing: -4px;
+      line-height: 1.0;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+
+    .hero-sub {
+      font-size: 19px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-bottom: 48px;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 96px;
+    }
+
+    .hero-img-wrap {
+      width: 75%;
+      max-width: 1440px;
+      margin: 0 auto;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    .hero-img-wrap img {
+      width: 100%;
+      display: block;
+    }
+
+    /* ─── SERVICES ─── */
+    .services-section {
+      background: var(--grey-bg);
+    }
+
+    .services-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .svc-col { padding: 140px 56px; }
+
+    .svc-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    .svc-header h2 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+    }
+
+    .svc-photo {
+      width: 100%;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .svc-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Printer head slides left/right slowly on loop */
+    @keyframes printhead-slide {
+      0%   { transform: translateX(-8%); }
+      50%  { transform: translateX(8%); }
+      100% { transform: translateX(-8%); }
+    }
+
+    .anim-printhead {
+      animation: printhead-slide 6s linear infinite;
+    }
+
+    .svc-col p {
+      font-size: 16px;
+      line-height: 1.85;
+      color: var(--muted);
+    }
+
+    /* ─── ABOUT / DARK BG ─── */
+    .about-section {
+      position: relative;
+      min-height: 620px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .about-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.32);
+    }
+
+    /* Wraps the tagline + card so the tagline sits outside, above, and left-aligned with the card */
+    .about-card-wrap {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    /* Card with a diagonal-cut bottom-right corner */
+    .about-card {
+      background: #fff;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 90px), calc(100% - 90px) 100%, 0 100%);
+      width: 100%;
+      text-align: left;
+    }
+
+    .about-eyebrow {
+      display: inline-block;
+      width: fit-content;
+      background: var(--orange);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 16px;
+    }
+
+    .about-card-body {
+      padding: 40px 40px;
+      text-align: left;
+    }
+
+    .about-card h2 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin-bottom: 16px;
+      color: var(--ink);
+    }
+
+    .about-card p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* ─── PROJECTS ─── */
+    .projects-section { padding: 160px 0; background: #fff; }
+
+    .projects-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--label);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .projects-section h2 {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      text-align: center;
+      margin-bottom: 72px;
+    }
+
+    /* Random-sized mosaic with per-tile scroll parallax */
+    .proj-masonry {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 200px;
+      grid-auto-flow: dense;
+      gap: 40px;
+    }
+
+    .proj-tile {
+      position: relative;
+      overflow: hidden;
+      background: var(--grey-bg);
+    }
+
+    .proj-tile img {
+      position: absolute;
+      top: -28px;
+      left: -28px;
+      width: calc(100% + 56px);
+      height: calc(100% + 56px);
+      object-fit: contain;
+      object-position: center;
+      will-change: transform;
+    }
+
+    .proj-tile-caption {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2;
+      max-width: 75%;
+      background: rgba(17,17,17,0.65);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.1px;
+      padding: 8px 16px;
+    }
+
+    /* ─── CONTACT ─── */
+    .contact-section {
+      background: var(--grey-bg);
+      border-top: 1px solid var(--line);
+    }
+
+    .contact-center {
+      padding: 160px 0;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .contact-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--label);
+      margin-bottom: 20px;
+    }
+
+    .contact-center h2 {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+    }
+
+    .contact-center > p {
+      font-size: 16px;
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .form-field { margin-bottom: 24px; }
+
+    .form-field label:not(.dropzone) {
+      display: flex;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--ink);
+      margin-bottom: 8px;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-field input {
+      width: 100%;
+      padding: 16px 16px;
+      border: 1.5px solid #ddd;
+      font-size: 16px;
+      font-family: 'Maven Pro', sans-serif;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-field input::placeholder { color: #bbb; }
+    .form-field input:focus { border-color: var(--ink); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--ink);
+      color: #fff;
+      padding: 80px 0 72px;
+    }
+
+    .footer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .footer-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.14);
+      margin-bottom: 32px;
+    }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-nav { display: flex; gap: 36px; list-style: none; flex-wrap: wrap; }
+
+    .footer-nav a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      transition: color 0.15s;
+    }
+
+    .footer-nav a:hover { color: #fff; }
+
+    .footer-copy { font-size: 13px; color: rgba(255,255,255,0.62); }
+
+    .footer-contact-nav { display: flex; gap: 32px; list-style: none; }
+
+    .footer-contact-nav a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      transition: color 0.15s;
+    }
+
+    .footer-contact-nav a:hover { color: #fff; }
+
+    /* ─── SHARED SECTION HEADING (new sections) ─── */
+    .sec-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--label);
+      margin-bottom: 20px;
+    }
+
+    .sec-title {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1.4px;
+      margin-bottom: 16px;
+    }
+
+    .sec-lead {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 620px;
+    }
+
+    .center { text-align: center; }
+    .center .sec-lead { margin: 0 auto; }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-section { padding: 160px 0; background: #fff; border-top: 1px solid var(--line); }
+
+    .how-wrap {
+      display: grid;
+      align-items: center;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+    }
+
+    .how-section .sec-lead { margin-bottom: 48px; }
+
+    .how-steps { display: flex; flex-direction: column; }
+
+    .how-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .how-step:first-child { padding-top: 0; }
+    .how-step:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .how-step-n {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      color: var(--orange);
+      flex-shrink: 0;
+      width: 76px;
+    }
+
+    .how-step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.2px; }
+    .how-step p { font-size: 16px; line-height: 1.75; color: var(--muted); }
+
+    .how-visual { position: relative; padding: 40px 40px; }
+
+    .how-visual img { width: 100%; height: auto; display: block; }
+
+    /* ─── MATERIALS & FINISHES ─── */
+    .materials-section { padding: 160px 0; background: var(--grey-bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+
+    .mat-grid { margin-top: 56px; }
+
+    .mat-list {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* Material buttons styled like .btn-secondary: diagonal cut, orange fill on hover/active */
+    .mat-item {
+      position: relative;
+      isolation: isolate;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--btn-border);
+      color: var(--ink);
+      padding: 24px 12px;
+      cursor: pointer;
+      text-align: center;
+      font-family: 'Maven Pro', sans-serif;
+      border: none;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--btn-cut)), calc(100% - var(--btn-cut)) 100%, 0 100%);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .mat-item::before,
+    .mat-item::after {
+      content: '';
+      position: absolute;
+      inset: 1.5px;
+      z-index: -1;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--btn-cut)), calc(100% - var(--btn-cut)) 100%, 0 100%);
+    }
+
+    .mat-item::before { background: #fff; }
+
+    .mat-item::after {
+      height: 0%;
+      top: auto;
+      background: var(--orange);
+      transition: height 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .mat-item:hover,
+    .mat-item.active { color: #fff; background: var(--orange); }
+
+    .mat-item:hover::after,
+    .mat-item.active::after { height: calc(100% - 3px); }
+
+    /* Relative-cost badge replaces the old decorative colour dot — real info instead of a colour we can't guarantee */
+    .mat-cost-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-width: 26px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+    }
+
+    .mat-item:hover .mat-cost-badge,
+    .mat-item.active .mat-cost-badge { border-color: transparent; }
+
+    .mat-name { font-weight: 700; font-size: 14px; }
+    .mat-tag { font-size: 11px; color: var(--label); transition: color 0.3s ease; }
+    .mat-item:hover .mat-tag,
+    .mat-item.active .mat-tag { color: rgba(255,255,255,0.85); }
+
+    .mat-detail { background: #fff; border: 1.5px solid var(--line); padding: 44px; }
+
+    .mat-detail-head { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+    .mat-detail-head .mat-cost-badge--lg { min-width: 34px; font-size: 13px; padding: 4px 8px; }
+    .mat-detail-head h3 { font-size: 25px; font-weight: 800; letter-spacing: -0.5px; }
+    .mat-detail-tag { font-size: 12.5px; color: var(--label); margin-left: auto; }
+
+    .mat-desc { font-size: 16px; color: var(--muted); line-height: 1.75; margin-bottom: 36px; }
+
+    .mat-bar { margin-bottom: 20px; }
+    .mat-bar:last-child { margin-bottom: 0; }
+    .mat-bar-labels { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    .mat-bar-labels span:last-child { color: var(--label); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .mat-bar-rating { color: var(--orange); font-weight: 700; }
+    .mat-bar-track { height: 6px; background: var(--grey-bg); overflow: hidden; }
+    .mat-bar-fill { height: 100%; background: var(--orange); width: 0%; transition: width 0.85s cubic-bezier(0.16,1,0.3,1); }
+
+    .mat-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .mat-footer-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--label);
+      margin-bottom: 8px;
+    }
+
+    .mat-uses { display: flex; flex-wrap: wrap; gap: 8px; }
+    .mat-use { font-size: 12px; background: var(--grey-bg); padding: 8px 12px; }
+    .mat-cost-value { font-size: 20px; font-weight: 800; }
+
+    /* ─── PRICING ─── */
+    .pricing-section { padding: 160px 0; background: var(--grey-bg); display: none; }
+
+    .price-toggle-wrap { display: flex; justify-content: center; margin: 40px 0 56px; }
+
+    .price-toggle { display: inline-flex; background: #fff; padding: 4px; border: 1px solid var(--line); }
+
+    .price-toggle-btn {
+      padding: 12px 24px;
+      font-family: 'Maven Pro', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .price-toggle-btn.active { background: var(--ink); color: #fff; }
+    .price-discount { color: var(--orange); font-weight: 800; margin-left: 4px; }
+
+    .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
+
+    .price-card { border: 1.5px solid var(--line); padding: 40px 36px; display: flex; flex-direction: column; background: #fff; text-align: left; }
+
+    .price-card--featured {
+      border-color: var(--ink);
+      box-shadow: 0 24px 50px rgba(0,0,0,0.12);
+      padding: 56px 36px 68px;
+      margin: -24px 0;
+    }
+
+    .price-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .price-card-head h3 { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
+
+    .price-badge {
+      background: var(--orange);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 8px;
+      white-space: nowrap;
+    }
+
+    .price-note { font-size: 16px; color: var(--muted); margin-bottom: 24px; }
+
+    .price-value-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 28px; }
+    .price-value { font-size: 42px; font-weight: 800; letter-spacing: -1.2px; }
+    .price-unit { font-size: 14px; color: var(--muted); }
+
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; flex-grow: 1; }
+    .price-features li { font-size: 16px; color: var(--muted); padding-left: 24px; position: relative; }
+    .price-features li::before { content: '✓'; position: absolute; left: 0; color: var(--orange); font-weight: 700; }
+
+    .price-features li.price-feature-optional { color: var(--label); font-style: italic; }
+    .price-features li.price-feature-optional::before { content: '+'; color: var(--muted); font-style: normal; }
+
+    .price-card .btn { align-self: flex-start; }
+
+    /* ─── FAQ ─── */
+    .faq-section { padding: 160px 0; background: #fff; border-top: 1px solid var(--line); }
+
+    .faq-wrap { display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 80px; }
+
+    .faq-list { display: flex; flex-direction: column; }
+
+    .faq-item { border-bottom: 1px solid var(--line); }
+
+    .faq-q {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 26px 0;
+      background: none;
+      border: none;
+      text-align: left;
+      font-family: 'Maven Pro', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .faq-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      color: var(--orange);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.3s ease, color 0.3s ease;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .faq-item.open .faq-a { max-height: 220px; }
+
+    .faq-a p {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 540px;
+      padding-bottom: 24px;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.35s ease 0.05s, transform 0.35s ease 0.05s;
+    }
+
+    .faq-item.open .faq-a p { opacity: 1; transform: translateY(0); }
+
+    /* ─── CONTACT UPGRADE (centered, single column) ─── */
+    .contact-info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--line);
+    }
+
+    .contact-info-list--row {
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 36px;
+      margin-bottom: 56px;
+    }
+
+    .contact-info-list--row .contact-info-item { text-align: left; }
+
+    .contact-info-item { display: flex; align-items: flex-start; gap: 16px; }
+
+    .contact-info-icon {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .contact-info-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--label);
+      margin-bottom: 4px;
+    }
+
+    .contact-info-value { font-size: 16px; font-weight: 600; color: var(--ink); }
+
+    .contact-form-wrap { position: relative; }
+
+    .contact-form-wrap form {
+      text-align: left;
+      background: #fff;
+      padding: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Decorative filament spool "hanging" beside the form card */
+    .contact-deco-img {
+      position: absolute;
+      top: 10%;
+      right: -240px;
+      width: 320px;
+      transform: rotate(3deg);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      padding: 16px 16px;
+      border: 1.5px solid #ddd;
+      font-size: 16px;
+      font-family: 'Maven Pro', sans-serif;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-field select { appearance: none; }
+    .form-field textarea { resize: vertical; }
+    .form-field textarea::placeholder { color: #bbb; }
+    .form-field select:focus,
+    .form-field textarea:focus { border-color: var(--ink); }
+
+    .dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 14px;
+      padding: 30px 20px;
+      border: 1.5px dashed #ccc;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .dropzone:hover { border-color: var(--ink); background: rgba(0,0,0,0.02); }
+    .dropzone-icon { font-size: 20px; color: var(--orange); display: flex; align-items: center; justify-content: center; }
+    .dropzone-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .dropzone-hint { font-size: 12px; color: var(--label); }
+
+    .custom-select { position: relative; width: 100%; font-family: 'Maven Pro', sans-serif; }
+
+    .custom-select-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 16px;
+      border: 1.5px solid #ddd;
+      background: #fff;
+      font-size: 16px;
+      font-family: 'Maven Pro', sans-serif;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s;
+    }
+
+    .custom-select-trigger:hover { border-color: #bbb; }
+    .custom-select.open .custom-select-trigger { border-color: var(--ink); }
+
+    .custom-select-arrow {
+      flex-shrink: 0;
+      margin-left: 12px;
+      color: var(--muted);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .custom-select.open .custom-select-arrow { transform: rotate(180deg); }
+
+    .custom-select-list {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1.5px solid var(--ink);
+      list-style: none;
+      margin: 0;
+      padding: 6px;
+      z-index: 20;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, transform 0.25s cubic-bezier(0.4,0,0.2,1), visibility 0s linear 0.3s;
+    }
+
+    .custom-select.open .custom-select-list {
+      max-height: 260px;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .custom-select-option {
+      padding: 12px 14px;
+      font-size: 15px;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .custom-select-option:hover,
+    .custom-select-option.selected { background: var(--orange); color: #fff; }
+
+    @media (max-width: 1200px) {
+      .contact-deco-img { width: 288px; }
+    }
+
+    /* iPad and smaller: swap the inline nav for a hamburger + full-screen menu */
+    @media (max-width: 1024px) {
+      .nav-links { display: none; }
+      .hamburger-btn { display: flex; }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .navbar { width: 88%; height: 68px; }
+      .hero h1 { font-size: 56px; letter-spacing: -2px; }
+      .hero-img-wrap { width: 88%; }
+      .services-wrap { grid-template-columns: 1fr; }
+      .svc-col { padding: 72px 0; }
+      .proj-masonry { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; gap: 24px; }
+      .proj-masonry .proj-tile { grid-column: span 1 !important; grid-row: span 1 !important; }
+      .contact-center { padding: 96px 0; }
+      .contact-info-list--row { flex-direction: column; gap: 20px; }
+      .contact-deco-img { display: none; }
+      .about-card { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 56px), calc(100% - 56px) 100%, 0 100%); }
+      .about-card-body { padding: 28px 24px 32px; }
+      .projects-section h2 { font-size: 34px; }
+
+      .sec-title { font-size: 30px; }
+      .how-wrap { grid-template-columns: 1fr; gap: 32px; }
+      .how-visual { order: -1; }
+      .how-step-n { font-size: 32px; width: 52px; }
+      .mat-list { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .mat-detail { padding: 28px 24px; }
+      .price-grid { grid-template-columns: 1fr; }
+      .price-card--featured { margin: 0; padding: 40px 36px; }
+      .faq-wrap { grid-template-columns: 1fr; gap: 32px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* Mobile: container/navbar/hero-img go full width with no width%-based gutter —
+       only the outer section keeps a flat 20px horizontal padding */
+    @media (max-width: 640px) {
+      .container { width: 100%; padding: 0 20px; box-sizing: border-box; }
+      .navbar { width: 100%; padding: 0 20px; box-sizing: border-box; }
+      .hero { padding-left: 20px; padding-right: 20px; }
+      .hero-img-wrap { width: 100%; padding: 0 20px; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ NAVBAR ════════════════ -->
+<div class="navbar-outer">
+  <nav class="navbar">
+    <a href="#" class="nav-brand">
+      <img class="logo-img" src="images/Strataform Light.svg" alt="Strataform Innovations" />
+    </a>
+
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#materials">Materials</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#contact" class="btn btn-primary nav-cta">Contact Us</a></li>
+      </ul>
+
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- ════════════════ MOBILE MENU (tablet & below) ════════════════ -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <nav class="mobile-menu-links">
+    <a href="#services">Services</a>
+    <a href="#materials">Materials</a>
+    <a href="#process">Process</a>
+    <a href="#about">About Us</a>
+    <a href="#contact" class="btn btn-primary">Contact Us</a>
+  </nav>
+</div>
+
+<!-- Luxy.js inertia-scroll wrapper: everything scrollable lives inside this,
+     while the sticky navbar and fixed mobile-menu overlay stay outside it. -->
+<div id="luxy">
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero">
+  <h1>Transforming<br>ideas into reality</h1>
+  <p class="hero-sub">Empowering your vision with cutting-edge technology</p>
+  <div class="hero-btns">
+    <a href="#contact" class="btn btn-primary">Start project →</a>
+    <a href="#about" class="btn btn-secondary">Learn more</a>
+  </div>
+  <div class="hero-img-wrap">
+    <img src="images/Strataform home page image.avif" alt="3D printed sculptural object on a reflective mat" />
+  </div>
+</section>
+
+<!-- ════════════════ SERVICES ════════════════ -->
+<div class="services-section" id="services">
+ <div class="services-wrap container">
+  <!-- 3D Printing -->
+  <div class="svc-col" id="printing">
+    <div class="svc-header">
+      <h2>3D Printing</h2>
+    </div>
+    <div class="svc-photo">
+      <img class="anim-printhead" src="images/3d printing-gif.gif" alt="3D printer extruder printing a black part" />
+    </div>
+    <p>3D printing is a technology that turns a digital file into a real object. The material is added layer by layer, which makes it possible to create both simple and very complex shapes. The advantages are speed, precision and adaptability.</p>
+  </div>
+
+  <!-- 3D Modeling -->
+  <div class="svc-col" id="modeling">
+    <div class="svc-header">
+      <h2>3D Modeling</h2>
+    </div>
+    <div class="svc-photo">
+      <img src="images/3D modelling-img.avif" alt="Colorful 3D modeled and printed vase" />
+    </div>
+    <p>3D modeling is the creation of a digital model ready for printing. Models can be made from scratch or based on sketches and ideas. Professionally prepared model ensures precision and functionality.</p>
+  </div>
+ </div>
+</div>
+
+<!-- ════════════════ ABOUT (dark bg) ════════════════ -->
+<section class="about-section" id="about">
+  <img class="about-bg-img" src="images/Who we are bg img.jpg" alt="3D printer in operation" />
+  <div class="about-card-wrap">
+    <div class="about-eyebrow">Who are we</div>
+    <div class="about-card">
+      <div class="about-card-body">
+        <h2>Strataform Innovations</h2>
+        <p>3D printing is a technology that turns a digital file into a real object. The material is added layer by layer, which makes it possible to create both simple and very complex shapes. The advantages are speed, precision and adaptability.</p>
+        <a href="#printing" class="btn btn-secondary">Find out more</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
+<section class="how-section" id="process">
+ <div class="container how-wrap">
+  <div>
+    <div class="sec-eyebrow">How it works</div>
+    <h2 class="sec-title">From file to finished part</h2>
+    <p class="sec-lead">Four simple steps from your idea to a printed, finished part in your hands.</p>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-n">01</div>
+        <div>
+          <h3>Upload your model</h3>
+          <p>Send us an STL, STEP or OBJ — or just a sketch. We review it for printability within hours.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-n">02</div>
+        <div>
+          <h3>Get a clear quote</h3>
+          <p>We confirm material, finish, timeline and a transparent price before anything is printed.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-n">03</div>
+        <div>
+          <h3>We print &amp; inspect</h3>
+          <p>Your part is printed on calibrated machines and quality-checked against your specification.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-n">04</div>
+        <div>
+          <h3>Finish &amp; deliver</h3>
+          <p>We post-process, package and ship — or keep iterating with you until it is exactly right.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="how-visual">
+    <img src="images/bambulab p1s printer.png" alt="Bambu Lab P1S 3D printer" />
+  </div>
+ </div>
+</section>
+
+<!-- ════════════════ MATERIALS & FINISHES ════════════════ -->
+<section class="materials-section" id="materials">
+ <div class="container">
+  <div class="center" style="max-width:640px;margin:0 auto 0;">
+    <div class="sec-eyebrow">Materials &amp; finishes</div>
+    <h2 class="sec-title">Pick the right material</h2>
+    <p class="sec-lead">Select a material to compare its properties. Not sure? Tell us how the part will be used and we'll recommend one.</p>
+  </div>
+
+  <div class="mat-grid">
+    <div class="mat-list" id="matList"></div>
+    <div class="mat-detail" id="matDetail"></div>
+  </div>
+ </div>
+</section>
+
+<!-- ════════════════ PROJECTS / PORTFOLIO ════════════════ -->
+<section class="projects-section" id="work">
+ <div class="container">
+  <div class="projects-eyebrow">Our Work</div>
+  <h2>Visual stories in innovation</h2>
+
+  <div class="proj-masonry" id="projMasonry">
+    <div class="proj-tile" data-speed="0.08" style="grid-column: span 2; grid-row: span 2;">
+      <img src="images/3d printing-gif.gif" alt="3D printer building an aero drone chassis" />
+      <div class="proj-tile-caption">Aero Drone Chassis</div>
+    </div>
+    <div class="proj-tile" data-speed="0.14" style="grid-column: span 1; grid-row: span 1;">
+      <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80&auto=format&fit=crop" alt="Production run of sensor enclosures" />
+      <div class="proj-tile-caption">Sensor Enclosures</div>
+    </div>
+    <div class="proj-tile" data-speed="0.05" style="grid-column: span 1; grid-row: span 2;">
+      <img src="images/3D modelling-img.avif" alt="Colorful sculptural vase series" />
+      <div class="proj-tile-caption">Sculptural Vase Series</div>
+    </div>
+    <div class="proj-tile" data-speed="0.11" style="grid-column: span 1; grid-row: span 1;">
+      <img src="images/Strataform home page image.avif" alt="Anatomical study model" />
+      <div class="proj-tile-caption">Anatomical Study Model</div>
+    </div>
+    <div class="proj-tile" data-speed="0.07" style="grid-column: span 2; grid-row: span 1;">
+      <img src="images/Filament spool.png" alt="Materials for a soft robotics gripper" />
+      <div class="proj-tile-caption">Soft Robotics Gripper</div>
+    </div>
+    <div class="proj-tile" data-speed="0.12" style="grid-column: span 1; grid-row: span 1;">
+      <img src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=600&q=80&auto=format&fit=crop" alt="Engineer reviewing a helical gear set" />
+      <div class="proj-tile-caption">Helical Gear Set</div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- ════════════════ PRICING ════════════════ -->
+<section class="pricing-section" id="pricing">
+ <div class="container center">
+  <div class="sec-eyebrow">Pricing</div>
+  <h2 class="sec-title">Simple, transparent pricing</h2>
+
+  <div class="price-toggle-wrap">
+    <div class="price-toggle" id="priceToggle">
+      <button class="price-toggle-btn active" data-mode="single">Single part</button>
+      <button class="price-toggle-btn" data-mode="batch">Batch (25+) <span class="price-discount">–30%</span></button>
+    </div>
+  </div>
+
+  <div class="price-grid">
+    <div class="price-card" data-single="₹6" data-batch="₹4.2">
+      <div class="price-card-head"><h3>Rapid Prototype</h3></div>
+      <p class="price-note">Turn one idea into a part, fast.</p>
+      <div class="price-value-row"><span class="price-value">₹6</span><span class="price-unit">/ gram</span></div>
+      <ul class="price-features">
+        <li>FDM printing</li>
+        <li>1–5 parts</li>
+        <li>3-day turnaround</li>
+        <li>Standard finish</li>
+        <li>One material choice</li>
+        <li class="price-feature-optional">3D modelling add-on — price on request</li>
+      </ul>
+      <a href="#contact" class="btn btn-secondary btn-sm">Start a print</a>
+    </div>
+
+    <div class="price-card price-card--featured" data-single="₹4" data-batch="₹2.8">
+      <div class="price-card-head">
+        <h3>Production Run</h3>
+        <span class="price-badge">Most popular</span>
+      </div>
+      <p class="price-note">Consistent batches at scale.</p>
+      <div class="price-value-row"><span class="price-value">₹4</span><span class="price-unit">/ gram</span></div>
+      <ul class="price-features">
+        <li>FDM printing</li>
+        <li>10–500 parts</li>
+        <li>Priority queue</li>
+        <li>Quality inspection</li>
+        <li>Any FDM material</li>
+        <li>Volume discounts</li>
+      </ul>
+      <a href="#contact" class="btn btn-primary btn-sm">Request a run</a>
+    </div>
+
+    <div class="price-card" data-single="Custom" data-batch="Custom">
+      <div class="price-card-head"><h3>Full Service</h3></div>
+      <p class="price-note">Design, print, finish, deliver.</p>
+      <div class="price-value-row"><span class="price-value">Custom</span><span class="price-unit"></span></div>
+      <ul class="price-features">
+        <li>3D modeling included</li>
+        <li>Post-processing &amp; painting</li>
+        <li>Dedicated project lead</li>
+        <li>Assembly &amp; packaging</li>
+        <li>NDA &amp; IP protection</li>
+        <li>Ongoing production</li>
+      </ul>
+      <a href="#contact" class="btn btn-secondary btn-sm">Talk to us</a>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- ════════════════ FAQ ════════════════ -->
+<section class="faq-section" id="faq">
+ <div class="container faq-wrap">
+  <div>
+    <div class="sec-eyebrow">FAQ</div>
+    <h2 class="sec-title" style="margin-bottom:0;">Questions, answered</h2>
+  </div>
+  <div class="faq-list" id="faqList">
+    <div class="faq-item open">
+      <button class="faq-q"><span>What file formats do you accept?</span><span class="faq-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg></span></button>
+      <div class="faq-a"><p>We work with STL, OBJ, STEP, 3MF and most native CAD files. No model yet? Send a sketch or reference and our team will build one for you.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>How fast can I get my parts?</span><span class="faq-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg></span></button>
+      <div class="faq-a"><p>Rapid prototypes ship in as little as 2–3 business days. Larger production runs are scheduled with a clear timeline confirmed before we begin.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>What is the maximum part size?</span><span class="faq-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg></span></button>
+      <div class="faq-a"><p>Our FDM printers handle parts up to 350 × 350 × 400 mm, and larger pieces can be printed in sections and bonded seamlessly.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>How do I choose the right material?</span><span class="faq-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg></span></button>
+      <div class="faq-a"><p>Tell us how the part will be used and we will recommend a material — or compare properties yourself in the materials section above.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Can you finish and paint parts?</span><span class="faq-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg></span></button>
+      <div class="faq-a"><p>Yes. We offer sanding, vapour smoothing, priming, painting and assembly so parts arrive presentation- or end-use ready.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Is there a minimum order?</span><span class="faq-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg></span></button>
+      <div class="faq-a"><p>None. We happily print a single part or a run of thousands, with volume pricing that scales down as your quantity grows.</p></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- ════════════════ CONTACT ════════════════ -->
+<section class="contact-section" id="contact">
+ <div class="container">
+  <div class="contact-center">
+    <div class="contact-eyebrow center">Contact</div>
+    <h2 class="center">Start your project today</h2>
+    <p class="center">Tell us about your idea and attach a model if you have one. We'll reply within one business day with a quote.</p>
+
+    <div class="contact-info-list contact-info-list--row">
+      <div class="contact-info-item">
+        <span class="contact-info-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2m6-2c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10Z"/></svg></span>
+        <div>
+          <div class="contact-info-label">Response time</div>
+          <div class="contact-info-value">Within 1 business day</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form-wrap">
+      <img class="contact-deco-img" src="images/Filament spool.png" alt="Filament spool" />
+      <form onsubmit="return false;">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Name</label>
+            <input type="text" placeholder="Your name" />
+          </div>
+          <div class="form-field">
+            <label>Phone</label>
+            <input type="tel" placeholder="Optional" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input type="email" placeholder="email@website.com" />
+        </div>
+        <div class="form-field">
+          <label>Service</label>
+          <div class="custom-select" id="serviceSelect">
+            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-value">3D Printing</span>
+              <svg class="custom-select-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <ul class="custom-select-list" role="listbox">
+              <li class="custom-select-option selected" role="option" data-value="3D Printing">3D Printing</li>
+              <li class="custom-select-option" role="option" data-value="3D Modeling">3D Modeling</li>
+              <li class="custom-select-option" role="option" data-value="Modeling + Printing">Modeling + Printing</li>
+              <li class="custom-select-option" role="option" data-value="Production run">Production run</li>
+              <li class="custom-select-option" role="option" data-value="Not sure yet">Not sure yet</li>
+            </ul>
+            <input type="hidden" name="service" value="3D Printing" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Project details</label>
+          <textarea rows="4" placeholder="Tell us what you want to make, quantity, material, deadline..."></textarea>
+        </div>
+        <div class="form-field">
+          <label>Model file</label>
+          <label class="dropzone">
+            <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
+            <span class="dropzone-label">Drop your model here</span>
+            <span class="dropzone-hint">STL, OBJ, STEP or 3MF · drag &amp; drop or click</span>
+            <input type="file" accept=".stl,.obj,.step,.stp,.3mf" style="display:none" />
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top:8px;">Send request →</button>
+      </form>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer>
+ <div class="container">
+  <div class="footer-top">
+    <img class="logo-img" src="images/Strataform Dark.svg" alt="Strataform Innovations" style="height:56px;" />
+
+    <ul class="footer-nav">
+      <li><a href="#printing">3D Printing</a></li>
+      <li><a href="#modeling">3D Modeling</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Strataform Innovation</span>
+
+    <ul class="footer-contact-nav">
+      <li><a href="mailto:admin@strataform.in">admin@strataform.in</a></li>
+      <li><a href="tel:+917013319687">+91 7013319687</a></li>
+    </ul>
+  </div>
+ </div>
+</footer>
+
+</div><!-- /#luxy -->
+
+<script src="https://cdn.jsdelivr.net/npm/luxy.js@0.1.0/dist/js/luxy.min.js"></script>
+<script>
+  // ─── LUXY.JS INERTIA SMOOTH SCROLL ───
+  (function () {
+    if (typeof luxy === 'undefined') return;
+    luxy.init({
+      wrapper: '#luxy',
+      targets: '.luxy-el',
+      wrapperSpeed: 0.08
+    });
+
+    // Force a height re-check once everything (images, fonts) has finished
+    // loading, so the scrollable area always matches the true content height
+    // and the very bottom of the page (footer) is never cut off.
+    window.addEventListener('load', function () {
+      var wrapperEl = document.querySelector('#luxy');
+      if (wrapperEl) document.body.style.height = wrapperEl.clientHeight + 'px';
+    });
+  })();
+
+  // ─── HAMBURGER / FULL-SCREEN MOBILE MENU ───
+  (function () {
+    var btn = document.getElementById('hamburgerBtn');
+    var menu = document.getElementById('mobileMenu');
+    var closeBtn = document.getElementById('mobileMenuClose');
+    if (!btn || !menu) return;
+
+    function openMenu() {
+      menu.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', openMenu);
+    if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+
+    Array.prototype.forEach.call(menu.querySelectorAll('a'), function (a) {
+      a.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 1024) closeMenu();
+    });
+  })();
+
+  // ─── MATERIALS & FINISHES ───
+  var MATERIALS = [
+    { name: 'PLA', tag: 'FDM · Filament', desc: 'Affordable and easy to print — ideal for concept models and display parts.', strengthPct: 55, detailPct: 82, heatPct: 30, strengthLabel: 'Medium', detailLabel: 'High', heatLabel: 'Low', cost: '₹', uses: ['Concept models', 'Display pieces', 'Low-stress parts'] },
+    { name: 'PETG', tag: 'FDM · Filament', desc: 'Tough, slightly flexible and water-resistant — a great all-round functional material.', strengthPct: 75, detailPct: 62, heatPct: 55, strengthLabel: 'High', detailLabel: 'Medium', heatLabel: 'Medium', cost: '₹₹', uses: ['Functional parts', 'Enclosures', 'Outdoor use'] },
+    { name: 'ABS', tag: 'FDM · Filament', desc: 'Impact-resistant, heat-tolerant engineering plastic that can be vapour-smoothed.', strengthPct: 80, detailPct: 60, heatPct: 78, strengthLabel: 'High', detailLabel: 'Medium', heatLabel: 'High', cost: '₹₹', uses: ['Housings', 'Automotive', 'Snap-fits'] },
+    { name: 'Nylon', tag: 'FDM · Filament', desc: 'Exceptional strength and wear resistance for demanding end-use mechanical parts.', strengthPct: 92, detailPct: 70, heatPct: 82, strengthLabel: 'Very high', detailLabel: 'High', heatLabel: 'High', cost: '₹₹₹', uses: ['Gears', 'Living hinges', 'End-use parts'] },
+    { name: 'ASA', tag: 'FDM · Filament', desc: 'UV- and weather-resistant — an outdoor-ready upgrade to ABS with a durable matte finish.', strengthPct: 80, detailPct: 58, heatPct: 80, strengthLabel: 'High', detailLabel: 'Medium', heatLabel: 'High', cost: '₹₹', uses: ['Outdoor parts', 'Automotive', 'Signage'] },
+    { name: 'TPU', tag: 'FDM · Flexible', desc: 'Rubber-like and durable — flexes and rebounds for grips, seals and wearables.', strengthPct: 68, detailPct: 55, heatPct: 45, strengthLabel: 'High', detailLabel: 'Medium', heatLabel: 'Medium', cost: '₹₹', uses: ['Grips & bumpers', 'Gaskets', 'Phone cases'] }
+  ];
+
+  (function () {
+    var listEl = document.getElementById('matList');
+    var detailEl = document.getElementById('matDetail');
+    if (!listEl || !detailEl) return;
+    var active = 0;
+
+    function rating5(pct) {
+      return (Math.round((pct / 100) * 5 * 2) / 2).toFixed(1);
+    }
+
+    function bar(label, value, valueLabel) {
+      return '<div class="mat-bar">' +
+        '<div class="mat-bar-labels"><span>' + label + '</span><span>' + valueLabel + '<span class="mat-bar-rating">' + rating5(value) + '/5</span></span></div>' +
+        '<div class="mat-bar-track"><div class="mat-bar-fill" data-target="' + value + '" style="width:0%;"></div></div>' +
+        '</div>';
+    }
+
+    function animateBars() {
+      var fills = detailEl.querySelectorAll('.mat-bar-fill');
+      // Double rAF so the browser paints the 0% state first, guaranteeing the
+      // width transition actually plays on freshly-created elements.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          Array.prototype.forEach.call(fills, function (f) {
+            f.style.width = f.getAttribute('data-target') + '%';
+          });
+        });
+      });
+    }
+
+    function renderDetail() {
+      var m = MATERIALS[active];
+      var uses = m.uses.map(function (u) { return '<span class="mat-use">' + u + '</span>'; }).join('');
+      detailEl.innerHTML =
+        '<div class="mat-detail-head">' +
+          '<span class="mat-cost-badge mat-cost-badge--lg">' + m.cost + '</span>' +
+          '<h3>' + m.name + '</h3>' +
+          '<span class="mat-detail-tag">' + m.tag + '</span>' +
+        '</div>' +
+        '<p class="mat-desc">' + m.desc + '</p>' +
+        '<div class="mat-bars">' +
+          bar('Strength', m.strengthPct, m.strengthLabel) +
+          bar('Detail resolution', m.detailPct, m.detailLabel) +
+          bar('Heat resistance', m.heatPct, m.heatLabel) +
+        '</div>' +
+        '<div class="mat-footer">' +
+          '<div><div class="mat-footer-label">Best for</div><div class="mat-uses">' + uses + '</div></div>' +
+          '<div><div class="mat-footer-label">Relative cost</div><div class="mat-cost-value">' + m.cost + '</div></div>' +
+        '</div>';
+      animateBars();
+    }
+
+    function renderList() {
+      listEl.innerHTML = MATERIALS.map(function (m, i) {
+        return '<button class="mat-item' + (i === active ? ' active' : '') + '" data-i="' + i + '">' +
+          '<span class="mat-cost-badge">' + m.cost + '</span>' +
+          '<span class="mat-name">' + m.name + '</span>' +
+          '<span class="mat-tag">' + m.tag + '</span>' +
+        '</button>';
+      }).join('');
+
+      Array.prototype.forEach.call(listEl.querySelectorAll('.mat-item'), function (btn) {
+        btn.addEventListener('click', function () {
+          if (parseInt(btn.getAttribute('data-i'), 10) === active) return;
+          active = parseInt(btn.getAttribute('data-i'), 10);
+          renderList();
+          renderDetail();
+        });
+      });
+    }
+
+    renderList();
+    renderDetail();
+  })();
+
+  // ─── PRICING TOGGLE ───
+  (function () {
+    var toggle = document.getElementById('priceToggle');
+    if (!toggle) return;
+    var cards = document.querySelectorAll('.price-card');
+
+    toggle.addEventListener('click', function (e) {
+      var btn = e.target.closest('.price-toggle-btn');
+      if (!btn) return;
+      var mode = btn.getAttribute('data-mode');
+
+      Array.prototype.forEach.call(toggle.querySelectorAll('.price-toggle-btn'), function (b) {
+        b.classList.toggle('active', b === btn);
+      });
+
+      cards.forEach(function (card) {
+        var val = card.getAttribute('data-' + mode);
+        card.querySelector('.price-value').textContent = val;
+      });
+    });
+  })();
+
+  // ─── CUSTOM SERVICE DROPDOWN ───
+  (function () {
+    var select = document.getElementById('serviceSelect');
+    if (!select) return;
+    var trigger = select.querySelector('.custom-select-trigger');
+    var valueEl = select.querySelector('.custom-select-value');
+    var hiddenInput = select.querySelector('input[type="hidden"]');
+    var options = select.querySelectorAll('.custom-select-option');
+
+    function closeSelect() {
+      select.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function openSelect() {
+      select.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      select.classList.contains('open') ? closeSelect() : openSelect();
+    });
+
+    options.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        options.forEach(function (o) { o.classList.remove('selected'); });
+        opt.classList.add('selected');
+        valueEl.textContent = opt.getAttribute('data-value');
+        if (hiddenInput) hiddenInput.value = opt.getAttribute('data-value');
+        closeSelect();
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!select.contains(e.target)) closeSelect();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeSelect();
+    });
+  })();
+
+  // ─── FAQ ACCORDION ───
+  (function () {
+    var list = document.getElementById('faqList');
+    if (!list) return;
+    var items = list.querySelectorAll('.faq-item');
+
+    items.forEach(function (item) {
+      item.querySelector('.faq-q').addEventListener('click', function () {
+        var isOpen = item.classList.contains('open');
+        items.forEach(function (i) { i.classList.remove('open'); });
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+  })();
+
+  // ─── PROJECTS MASONRY: random order + scroll parallax depth ───
+  (function () {
+    var grid = document.getElementById('projMasonry');
+    if (!grid) return;
+    var tiles = Array.prototype.slice.call(grid.querySelectorAll('.proj-tile'));
+
+    // Shuffle into a random order on each load (Fisher-Yates)
+    for (var i = tiles.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = tiles[i]; tiles[i] = tiles[j]; tiles[j] = tmp;
+    }
+    tiles.forEach(function (tile) { grid.appendChild(tile); });
+
+    // Each tile drifts at its own speed for a layered depth feel while scrolling
+    var ticking = false;
+    function updateParallax() {
+      var vh = window.innerHeight;
+      tiles.forEach(function (tile) {
+        var rect = tile.getBoundingClientRect();
+        var speed = parseFloat(tile.getAttribute('data-speed')) || 0.08;
+        var offset = (rect.top + rect.height / 2 - vh / 2) * speed;
+        offset = Math.max(-24, Math.min(24, offset));
+        var img = tile.querySelector('img');
+        if (img) img.style.transform = 'translateY(' + offset + 'px)';
+      });
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        window.requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateParallax);
+    updateParallax();
+  })();
+</script>
+
+</body>
+</html>
