@@ -43,19 +43,78 @@
       pointer-events: none;
     }
 
-    .page-loader-mark {
+    .page-loader-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .page-loader-mark-wrap {
+      position: relative;
       width: 56px;
       height: 56px;
       animation: page-loader-pulse 1.1s ease-in-out infinite;
     }
 
+    .page-loader-mark {
+      position: absolute;
+      inset: 0;
+      width: 56px;
+      height: 56px;
+    }
+
+    .page-loader-mark-ghost { opacity: 0.15; }
+
+    .page-loader-mark-fill {
+      clip-path: inset(100% 0 0 0);
+      transition: clip-path 0.12s linear;
+    }
+
     @keyframes page-loader-pulse {
-      0%, 100% { transform: scale(0.86); opacity: 0.55; }
-      50% { transform: scale(1); opacity: 1; }
+      0%, 100% { transform: scale(0.94); }
+      50% { transform: scale(1); }
+    }
+
+    /* ─── PAGE LOADER PROGRESS BAR ─── */
+    .page-loader-progress {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-loader-bar {
+      --bar-cut: 9px;
+      position: relative;
+      width: 220px;
+      height: 14px;
+      background: var(--grey-bg);
+      border: 1px solid var(--line);
+      clip-path: polygon(0 0, calc(100% - var(--bar-cut)) 0, 100% var(--bar-cut), 100% 100%, var(--bar-cut) 100%, 0 calc(100% - var(--bar-cut)));
+    }
+
+    .page-loader-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--orange);
+      transition: width 0.15s linear;
+    }
+
+    .page-loader-pct {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      min-width: 3ch;
+      text-align: center;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .page-loader-mark { animation: none; }
+      .page-loader-mark-wrap { animation: none; }
+      .page-loader-mark-fill { transition: none; }
+      .page-loader-bar-fill { transition: none; }
       .page-loader { transition: none; }
     }
 
@@ -1199,12 +1258,28 @@
 
 <!-- ════════════════ PAGE LOADER ════════════════ -->
 <div class="page-loader" id="pageLoader">
-  <svg class="page-loader-mark" viewBox="18 10 142 174" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <polygon fill="var(--orange)" points="115.32 42.69 89.45 68.56 88.85 67.96 63.57 42.69 66.2 40.06 89.45 16.81 115.32 42.69"/>
-    <path fill="var(--ink)" d="M131.38,78.53h-2.78c.46-.03.92-.04,1.39-.04s.93.01,1.39.04Z"/>
-    <path fill="var(--ink)" d="M147.95,119.81c-.39.42-.79.82-1.21,1.21l1.21-1.21Z"/>
-    <path fill="var(--ink)" d="M32.58,74.94c4.79-4.79,19.59-19.59,19.59-19.59-.22,1.17-.33,2.37-.33,3.6,0,3.85,1.11,7.43,3.02,10.46,2.96,4.69,7.83,8.31,13.58,8.91.95.1,2.85.21,3.8.21h59.13c.7.04,1.4.11,2.08.21.53.07,1.06.16,1.58.27,9.52,1.99,17.01,9.48,19,19,.24,1.15.4,2.33.47,3.53.03.5.05,1.01.05,1.51s-.02,1.01-.05,1.51c-.3,4.96-2.08,9.52-4.89,13.25-.52.7-1.08,1.37-1.68,2l-1.21,1.21-58.04,58.04-27.78-27.78,33.47-33.47h-45.44c-1.17,0-2.31-.08-3.44-.24-11.94-1.67-21.12-11.92-21.12-24.32,0-5.53,1.63-10.78,4.9-14.73.78-.94,2.74-3.04,3.29-3.58Z"/>
-  </svg>
+  <div class="page-loader-inner">
+    <div class="page-loader-mark-wrap">
+      <svg class="page-loader-mark page-loader-mark-ghost" viewBox="18 10 142 174" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <polygon fill="var(--ink)" points="115.32 42.69 89.45 68.56 88.85 67.96 63.57 42.69 66.2 40.06 89.45 16.81 115.32 42.69"/>
+        <path fill="var(--ink)" d="M131.38,78.53h-2.78c.46-.03.92-.04,1.39-.04s.93.01,1.39.04Z"/>
+        <path fill="var(--ink)" d="M147.95,119.81c-.39.42-.79.82-1.21,1.21l1.21-1.21Z"/>
+        <path fill="var(--ink)" d="M32.58,74.94c4.79-4.79,19.59-19.59,19.59-19.59-.22,1.17-.33,2.37-.33,3.6,0,3.85,1.11,7.43,3.02,10.46,2.96,4.69,7.83,8.31,13.58,8.91.95.1,2.85.21,3.8.21h59.13c.7.04,1.4.11,2.08.21.53.07,1.06.16,1.58.27,9.52,1.99,17.01,9.48,19,19,.24,1.15.4,2.33.47,3.53.03.5.05,1.01.05,1.51s-.02,1.01-.05,1.51c-.3,4.96-2.08,9.52-4.89,13.25-.52.7-1.08,1.37-1.68,2l-1.21,1.21-58.04,58.04-27.78-27.78,33.47-33.47h-45.44c-1.17,0-2.31-.08-3.44-.24-11.94-1.67-21.12-11.92-21.12-24.32,0-5.53,1.63-10.78,4.9-14.73.78-.94,2.74-3.04,3.29-3.58Z"/>
+      </svg>
+      <svg class="page-loader-mark page-loader-mark-fill" id="loaderMarkFill" viewBox="18 10 142 174" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <polygon fill="var(--orange)" points="115.32 42.69 89.45 68.56 88.85 67.96 63.57 42.69 66.2 40.06 89.45 16.81 115.32 42.69"/>
+        <path fill="var(--ink)" d="M131.38,78.53h-2.78c.46-.03.92-.04,1.39-.04s.93.01,1.39.04Z"/>
+        <path fill="var(--ink)" d="M147.95,119.81c-.39.42-.79.82-1.21,1.21l1.21-1.21Z"/>
+        <path fill="var(--ink)" d="M32.58,74.94c4.79-4.79,19.59-19.59,19.59-19.59-.22,1.17-.33,2.37-.33,3.6,0,3.85,1.11,7.43,3.02,10.46,2.96,4.69,7.83,8.31,13.58,8.91.95.1,2.85.21,3.8.21h59.13c.7.04,1.4.11,2.08.21.53.07,1.06.16,1.58.27,9.52,1.99,17.01,9.48,19,19,.24,1.15.4,2.33.47,3.53.03.5.05,1.01.05,1.51s-.02,1.01-.05,1.51c-.3,4.96-2.08,9.52-4.89,13.25-.52.7-1.08,1.37-1.68,2l-1.21,1.21-58.04,58.04-27.78-27.78,33.47-33.47h-45.44c-1.17,0-2.31-.08-3.44-.24-11.94-1.67-21.12-11.92-21.12-24.32,0-5.53,1.63-10.78,4.9-14.73.78-.94,2.74-3.04,3.29-3.58Z"/>
+      </svg>
+    </div>
+    <div class="page-loader-progress">
+      <div class="page-loader-bar">
+        <div class="page-loader-bar-fill" id="loaderBarFill"></div>
+      </div>
+      <div class="page-loader-pct" id="loaderPct">0%</div>
+    </div>
+  </div>
 </div>
 <noscript><style>.page-loader { display: none !important; } html.is-loading, html.is-loading body { overflow: visible !important; height: auto !important; }</style></noscript>
 
@@ -1607,18 +1682,54 @@
   (function () {
     var loader = document.getElementById('pageLoader');
     if (!loader) return;
-    var MIN_VISIBLE = 400;
+    var barFill = document.getElementById('loaderBarFill');
+    var pctLabel = document.getElementById('loaderPct');
+    var markFill = document.getElementById('loaderMarkFill');
+    var MIN_VISIBLE = 500;
     var shownAt = Date.now();
+    var progress = 0;
+    var rafId = null;
+
+    function render() {
+      var shown = Math.round(progress);
+      if (barFill) barFill.style.width = progress + '%';
+      if (pctLabel) pctLabel.textContent = shown + '%';
+      if (markFill) markFill.style.clipPath = 'inset(' + (100 - progress) + '% 0 0 0)';
+    }
+
+    // Eases toward 90% while real resources are still loading, without ever
+    // claiming completion before the page has actually finished.
+    function creep() {
+      progress += (90 - progress) * 0.03 + 0.15;
+      progress = Math.min(progress, 90);
+      render();
+      if (progress < 90) rafId = requestAnimationFrame(creep);
+    }
+    rafId = requestAnimationFrame(creep);
 
     function hideLoader() {
-      var wait = Math.max(0, MIN_VISIBLE - (Date.now() - shownAt));
-      setTimeout(function () {
-        document.documentElement.classList.remove('is-loading');
-        loader.classList.add('is-hidden');
-        loader.addEventListener('transitionend', function () {
-          if (loader.parentNode) loader.parentNode.removeChild(loader);
-        }, { once: true });
-      }, wait);
+      if (rafId) cancelAnimationFrame(rafId);
+      var from = progress;
+      var start = null;
+      function finish(ts) {
+        if (!start) start = ts;
+        var t = Math.min((ts - start) / 350, 1);
+        progress = from + (100 - from) * t;
+        render();
+        if (t < 1) {
+          requestAnimationFrame(finish);
+        } else {
+          var wait = Math.max(0, MIN_VISIBLE - (Date.now() - shownAt));
+          setTimeout(function () {
+            document.documentElement.classList.remove('is-loading');
+            loader.classList.add('is-hidden');
+            loader.addEventListener('transitionend', function () {
+              if (loader.parentNode) loader.parentNode.removeChild(loader);
+            }, { once: true });
+          }, wait);
+        }
+      }
+      requestAnimationFrame(finish);
     }
 
     if (document.readyState === 'complete') {
