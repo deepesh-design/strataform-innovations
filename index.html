@@ -665,7 +665,7 @@
       justify-content: center;
     }
 
-    .req-star { color: var(--orange); margin-left: 3px; }
+    .req-star { color: var(--orange); font-size: 22px; line-height: 1; margin-left: 4px; vertical-align: -2px; }
 
     .form-field input.is-invalid,
     .form-field textarea.is-invalid,
@@ -1172,9 +1172,19 @@
     }
 
     .dropzone:hover { border-color: var(--ink); background: rgba(0,0,0,0.02); }
+    .dropzone.is-dragover { border-color: var(--orange); background: rgba(255,90,31,0.05); }
     .dropzone-icon { font-size: 20px; color: var(--orange); display: flex; align-items: center; justify-content: center; }
     .dropzone-label { font-size: 14px; font-weight: 600; color: var(--ink); }
     .dropzone-hint { font-size: 12px; color: var(--label); }
+
+    .file-error {
+      font-size: 13px;
+      color: var(--orange);
+      margin-top: 10px;
+      display: none;
+    }
+
+    .file-error.is-visible { display: block; }
 
     .form-success {
       position: absolute;
@@ -1789,10 +1799,11 @@
             <label class="dropzone">
               <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
               <span class="dropzone-label" id="dropzoneLabel">Drop your model here</span>
-              <span class="dropzone-hint">STL, OBJ, STEP or 3MF · drag &amp; drop or click · multiple files ok</span>
+              <span class="dropzone-hint">STL, OBJ, STEP or 3MF · up to 5 files, 10MB each</span>
               <input type="file" name="attachment" accept=".stl,.obj,.step,.stp,.3mf" multiple style="display:none" />
             </label>
             <div class="file-chip-list" id="fileChipList"></div>
+            <div class="form-error" id="fileError"></div>
           </div>
           <div class="form-error" id="formError">Please fill in all required fields before sending.</div>
           <button type="submit" class="btn btn-primary" style="margin-top:8px;">Send request →</button>
@@ -2219,7 +2230,11 @@
     // ── Model file chips (supports multiple files + removal) ──
     var fileInput = form.querySelector('input[type="file"]');
     var fileChipList = document.getElementById('fileChipList');
+    var fileError = document.getElementById('fileError');
     var selectedFiles = [];
+
+    var MAX_FILES = 5;
+    var MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
 
     var FILE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>';
 
@@ -2232,6 +2247,23 @@
     function fileExt(name) {
       var parts = name.split('.');
       return parts.length > 1 ? parts.pop().toUpperCase() : 'FILE';
+    }
+
+    function showFileError(message) {
+      if (!fileError) return;
+      fileError.textContent = message;
+      fileError.classList.add('is-visible');
+    }
+
+    function clearFileError() {
+      if (!fileError) return;
+      fileError.classList.remove('is-visible');
+    }
+
+    function isDuplicate(file) {
+      return selectedFiles.some(function (f) {
+        return f.name === file.name && f.size === file.size;
+      });
     }
 
     function syncFileInput() {
@@ -2259,15 +2291,51 @@
           selectedFiles.splice(idx, 1);
           syncFileInput();
           renderChips();
+          clearFileError();
         });
         fileChipList.appendChild(chip);
       });
     }
 
+    // Adds newly-picked files to whatever's already selected instead of
+    // replacing it, so choosing files across multiple browse actions (or
+    // multi-selecting in one dialog) both work as "add", not "replace".
+    function addFiles(newFiles) {
+      var rejectedOversize = [];
+      var rejectedDuplicate = 0;
+      var rejectedOverLimit = 0;
+
+      Array.prototype.forEach.call(newFiles, function (file) {
+        if (selectedFiles.length >= MAX_FILES) {
+          rejectedOverLimit++;
+          return;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          rejectedOversize.push(file.name);
+          return;
+        }
+        if (isDuplicate(file)) {
+          rejectedDuplicate++;
+          return;
+        }
+        selectedFiles.push(file);
+      });
+
+      syncFileInput();
+      renderChips();
+
+      if (rejectedOversize.length) {
+        showFileError(rejectedOversize.join(', ') + (rejectedOversize.length > 1 ? ' are' : ' is') + ' over the 10MB limit and ' + (rejectedOversize.length > 1 ? 'were' : 'was') + ' skipped.');
+      } else if (rejectedOverLimit) {
+        showFileError('Only ' + MAX_FILES + ' files allowed — ' + rejectedOverLimit + ' extra file' + (rejectedOverLimit > 1 ? 's' : '') + ' skipped.');
+      } else {
+        clearFileError();
+      }
+    }
+
     if (fileInput) {
       fileInput.addEventListener('change', function () {
-        selectedFiles = Array.prototype.slice.call(fileInput.files);
-        renderChips();
+        addFiles(fileInput.files);
       });
     }
 
@@ -2316,6 +2384,7 @@
         form.reset();
         selectedFiles = [];
         renderChips();
+        clearFileError();
         resetServiceField();
         return;
       }
@@ -2352,6 +2421,7 @@
             form.reset();
             selectedFiles = [];
             renderChips();
+            clearFileError();
             resetServiceField();
           } else {
             errorBanner.textContent = (data && data.message) ||
