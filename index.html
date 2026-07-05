@@ -665,7 +665,14 @@
       justify-content: center;
     }
 
-    .req-star { color: var(--orange); font-size: 22px; line-height: 1; margin-left: 4px; vertical-align: -2px; }
+    .req-text {
+      color: var(--orange);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
 
     .form-field input.is-invalid,
     .form-field textarea.is-invalid,
@@ -1137,7 +1144,7 @@
       z-index: 0;
     }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: end; }
 
     .form-field select,
     .form-field textarea {
@@ -1229,13 +1236,26 @@
       margin-top: 14px;
     }
 
+    /* Border is drawn as a layered shape (like .btn-secondary) instead of a
+       native `border`, since a straight border doesn't keep a consistent
+       stroke width where clip-path cuts across it diagonally. */
     .file-chip {
+      position: relative;
+      isolation: isolate;
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 10px 14px;
+      background: var(--line);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
+    .file-chip::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      z-index: -1;
       background: var(--grey-bg);
-      border: 1px solid var(--line);
       clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
     }
 
@@ -1761,7 +1781,7 @@
 
           <div class="form-row">
             <div class="form-field">
-              <label><span>Name<span class="req-star">*</span></span></label>
+              <label><span>Name<span class="req-text">Required</span></span></label>
               <input type="text" name="name" placeholder="Your name" required />
             </div>
             <div class="form-field">
@@ -1770,11 +1790,11 @@
             </div>
           </div>
           <div class="form-field">
-            <label><span>Email<span class="req-star">*</span></span></label>
+            <label><span>Email<span class="req-text">Required</span></span></label>
             <input type="email" name="email" placeholder="email@website.com" required />
           </div>
           <div class="form-field">
-            <label><span>Service<span class="req-star">*</span></span></label>
+            <label><span>Service<span class="req-text">Required</span></span></label>
             <div class="custom-select" id="serviceSelect">
               <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
                 <span class="custom-select-value is-placeholder">Select one</span>
@@ -1791,7 +1811,7 @@
             </div>
           </div>
           <div class="form-field">
-            <label><span>Project details<span class="req-star">*</span></span></label>
+            <label><span>Project details<span class="req-text">Required</span></span></label>
             <textarea rows="4" name="message" placeholder="Tell us what you want to make, quantity, material, deadline..." required></textarea>
           </div>
           <div class="form-field">
