@@ -482,18 +482,16 @@
     .proj-tile {
       position: relative;
       overflow: hidden;
-      background: var(--grey-bg);
     }
 
     .proj-tile img {
       position: absolute;
-      top: -28px;
-      left: -28px;
-      width: calc(100% + 56px);
-      height: calc(100% + 56px);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       object-position: center;
-      will-change: transform;
     }
 
     .proj-tile-caption {
@@ -1324,27 +1322,27 @@
   <h2>Visual stories in innovation</h2>
 
   <div class="proj-masonry" id="projMasonry">
-    <div class="proj-tile" data-speed="0.08" style="grid-column: span 2; grid-row: span 2;">
+    <div class="proj-tile" style="grid-column: span 2; grid-row: span 2;">
       <img src="images/3d printing-gif.gif" alt="3D printer building an aero drone chassis" />
       <div class="proj-tile-caption">Aero Drone Chassis</div>
     </div>
-    <div class="proj-tile" data-speed="0.14" style="grid-column: span 1; grid-row: span 1;">
+    <div class="proj-tile" style="grid-column: span 1; grid-row: span 1;">
       <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80&auto=format&fit=crop" alt="Production run of sensor enclosures" />
       <div class="proj-tile-caption">Sensor Enclosures</div>
     </div>
-    <div class="proj-tile" data-speed="0.05" style="grid-column: span 1; grid-row: span 2;">
+    <div class="proj-tile" style="grid-column: span 1; grid-row: span 2;">
       <img src="images/3D modelling-img.avif" alt="Colorful sculptural vase series" />
       <div class="proj-tile-caption">Sculptural Vase Series</div>
     </div>
-    <div class="proj-tile" data-speed="0.11" style="grid-column: span 1; grid-row: span 1;">
+    <div class="proj-tile" style="grid-column: span 1; grid-row: span 1;">
       <img src="images/Strataform home page image.avif" alt="Anatomical study model" />
       <div class="proj-tile-caption">Anatomical Study Model</div>
     </div>
-    <div class="proj-tile" data-speed="0.07" style="grid-column: span 2; grid-row: span 1;">
+    <div class="proj-tile" style="grid-column: span 2; grid-row: span 1;">
       <img src="images/Filament spool.png" alt="Materials for a soft robotics gripper" />
       <div class="proj-tile-caption">Soft Robotics Gripper</div>
     </div>
-    <div class="proj-tile" data-speed="0.12" style="grid-column: span 1; grid-row: span 1;">
+    <div class="proj-tile" style="grid-column: span 1; grid-row: span 1;">
       <img src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=600&q=80&auto=format&fit=crop" alt="Engineer reviewing a helical gear set" />
       <div class="proj-tile-caption">Helical Gear Set</div>
     </div>
@@ -1774,7 +1772,7 @@
     });
   })();
 
-  // ─── PROJECTS MASONRY: random order + scroll parallax depth ───
+  // ─── PROJECTS MASONRY: random order ───
   (function () {
     var grid = document.getElementById('projMasonry');
     if (!grid) return;
@@ -1786,30 +1784,6 @@
       var tmp = tiles[i]; tiles[i] = tiles[j]; tiles[j] = tmp;
     }
     tiles.forEach(function (tile) { grid.appendChild(tile); });
-
-    // Each tile drifts at its own speed for a layered depth feel while scrolling
-    var ticking = false;
-    function updateParallax() {
-      var vh = window.innerHeight;
-      tiles.forEach(function (tile) {
-        var rect = tile.getBoundingClientRect();
-        var speed = parseFloat(tile.getAttribute('data-speed')) || 0.08;
-        var offset = (rect.top + rect.height / 2 - vh / 2) * speed;
-        offset = Math.max(-24, Math.min(24, offset));
-        var img = tile.querySelector('img');
-        if (img) img.style.transform = 'translateY(' + offset + 'px)';
-      });
-      ticking = false;
-    }
-
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
-        window.requestAnimationFrame(updateParallax);
-        ticking = true;
-      }
-    }, { passive: true });
-    window.addEventListener('resize', updateParallax);
-    updateParallax();
   })();
 </script>
 
