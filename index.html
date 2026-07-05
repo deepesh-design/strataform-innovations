@@ -1152,6 +1152,25 @@
     .dropzone-label { font-size: 14px; font-weight: 600; color: var(--ink); }
     .dropzone-hint { font-size: 12px; color: var(--label); }
 
+    .form-success {
+      text-align: center;
+      padding: 48px 24px;
+      border: 1px solid var(--line);
+      background: var(--grey-bg);
+    }
+
+    .form-success h3 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      margin-bottom: 10px;
+    }
+
+    .form-success p {
+      font-size: 15px;
+      color: var(--muted);
+    }
+
     .custom-select { position: relative; width: 100%; font-family: 'Maven Pro', sans-serif; }
 
     .custom-select-trigger {
@@ -1609,20 +1628,31 @@
 
     <div class="contact-form-wrap">
       <img class="contact-deco-img" src="images/Filament spool.webp" alt="Filament spool" />
-      <form onsubmit="return false;">
+
+      <div class="form-success" id="formSuccess" style="display:none;">
+        <h3>Request sent</h3>
+        <p>Thanks — we've got your project details and will reply within 1 business day.</p>
+      </div>
+
+      <form id="contactForm" action="https://formsubmit.co/admin@strataform.in" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_subject" value="New project request — Strataform website" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_next" value="https://strataform.in/?sent=true#contact" />
+        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+
         <div class="form-row">
           <div class="form-field">
             <label>Name</label>
-            <input type="text" placeholder="Your name" />
+            <input type="text" name="name" placeholder="Your name" required />
           </div>
           <div class="form-field">
             <label>Phone</label>
-            <input type="tel" placeholder="Optional" />
+            <input type="tel" name="phone" placeholder="Optional" />
           </div>
         </div>
         <div class="form-field">
           <label>Email</label>
-          <input type="email" placeholder="email@website.com" />
+          <input type="email" name="email" placeholder="email@website.com" required />
         </div>
         <div class="form-field">
           <label>Service</label>
@@ -1643,15 +1673,15 @@
         </div>
         <div class="form-field">
           <label>Project details</label>
-          <textarea rows="4" placeholder="Tell us what you want to make, quantity, material, deadline..."></textarea>
+          <textarea rows="4" name="message" placeholder="Tell us what you want to make, quantity, material, deadline..."></textarea>
         </div>
         <div class="form-field">
           <label>Model file</label>
           <label class="dropzone">
             <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
-            <span class="dropzone-label">Drop your model here</span>
+            <span class="dropzone-label" id="dropzoneLabel">Drop your model here</span>
             <span class="dropzone-hint">STL, OBJ, STEP or 3MF · drag &amp; drop or click</span>
-            <input type="file" accept=".stl,.obj,.step,.stp,.3mf" style="display:none" />
+            <input type="file" name="attachment" accept=".stl,.obj,.step,.stp,.3mf" style="display:none" />
           </label>
         </div>
         <button type="submit" class="btn btn-primary" style="margin-top:8px;">Send request →</button>
@@ -2036,6 +2066,32 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closeSelect();
     });
+  })();
+
+  // ─── CONTACT FORM ───
+  (function () {
+    var form = document.getElementById('contactForm');
+    var success = document.getElementById('formSuccess');
+    if (!form || !success) return;
+
+    // FormSubmit redirects back here with ?sent=true once the email is
+    // actually delivered, so we only show the confirmation after a real send.
+    if (/[?&]sent=true\b/.test(window.location.search)) {
+      form.style.display = 'none';
+      success.style.display = 'block';
+      var cleanUrl = window.location.pathname + window.location.hash;
+      history.replaceState(null, '', cleanUrl);
+    }
+
+    var fileInput = form.querySelector('input[type="file"]');
+    var dropzoneLabel = document.getElementById('dropzoneLabel');
+    if (fileInput && dropzoneLabel) {
+      fileInput.addEventListener('change', function () {
+        dropzoneLabel.textContent = fileInput.files.length
+          ? fileInput.files[0].name
+          : 'Drop your model here';
+      });
+    }
   })();
 
   // ─── FAQ ACCORDION ───
