@@ -1293,9 +1293,9 @@
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#services">Services</a></li>
-        <li><a href="#materials">Materials</a></li>
-        <li><a href="#process">Process</a></li>
         <li><a href="#about">About Us</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#materials">Materials</a></li>
         <li><a href="#contact" class="btn btn-primary nav-cta">Contact Us</a></li>
       </ul>
 
@@ -1313,9 +1313,9 @@
   </button>
   <nav class="mobile-menu-links">
     <a href="#services">Services</a>
-    <a href="#materials">Materials</a>
-    <a href="#process">Process</a>
     <a href="#about">About Us</a>
+    <a href="#process">Process</a>
+    <a href="#materials">Materials</a>
     <a href="#contact" class="btn btn-primary">Contact Us</a>
   </nav>
 </div>
@@ -1654,10 +1654,11 @@
     <img class="logo-img" src="images/Strataform Dark.svg" alt="Strataform Innovations" style="height:56px;" />
 
     <ul class="footer-nav">
-      <li><a href="#printing">3D Printing</a></li>
-      <li><a href="#modeling">3D Modeling</a></li>
-      <li><a href="#work">Work</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#about">About Us</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#materials">Materials</a></li>
+      <li><a href="#contact">Contact Us</a></li>
     </ul>
   </div>
 
@@ -1754,6 +1755,36 @@
     window.addEventListener('load', function () {
       var wrapperEl = document.querySelector('#luxy');
       if (wrapperEl) document.body.style.height = wrapperEl.clientHeight + 'px';
+    });
+  })();
+
+  // ─── IN-PAGE ANCHOR SCROLL ───
+  // The luxy.js wrapper above is `position: fixed`, so the browser's native
+  // href="#id" jump can't resolve a real scroll offset for anything inside
+  // it. Every in-page link (nav, footer, buttons) needs this to actually move.
+  (function () {
+    var links = document.querySelectorAll('a[href^="#"]:not([href="#"])');
+    var navbarOuter = document.querySelector('.navbar-outer');
+
+    function cumulativeOffsetTop(el) {
+      var top = 0;
+      while (el) {
+        top += el.offsetTop;
+        el = el.offsetParent;
+      }
+      return top;
+    }
+
+    links.forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var target = document.getElementById(link.getAttribute('href').slice(1));
+        if (!target) return;
+        e.preventDefault();
+        var navH = navbarOuter ? navbarOuter.getBoundingClientRect().height : 0;
+        var top = Math.max(0, cumulativeOffsetTop(target) - navH - 12);
+        window.scrollTo({ top: top, behavior: 'smooth' });
+        history.pushState(null, '', '#' + target.id);
+      });
     });
   })();
 
