@@ -1807,12 +1807,12 @@
             <div class="field-error" id="messageFieldError"></div>
           </div>
           <div class="form-field">
-            <label><span>Attach files<span class="optional-text">(optional)</span></span></label>
+            <label><span>Attach a file<span class="optional-text">(optional)</span></span></label>
             <label class="dropzone">
               <span class="dropzone-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m8 16 4-4m0 0 4 4m-4-4v9m8-4.257A5.5 5.5 0 0 0 16.5 7a.62.62 0 0 1-.534-.302 7.5 7.5 0 1 0-11.78 9.096"/></svg></span>
-              <span class="dropzone-label" id="dropzoneLabel">Drop your files here</span>
-              <span class="dropzone-hint">JPEG, PNG, PDF, STL, OBJ, STEP or 3MF · up to 5 files, 10MB each</span>
-              <input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.stl,.obj,.step,.stp,.3mf" multiple style="display:none" />
+              <span class="dropzone-label" id="dropzoneLabel">Drop your file here</span>
+              <span class="dropzone-hint">JPEG, PNG, PDF, STL, OBJ, STEP or 3MF · one file, 10MB max</span>
+              <input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.stl,.obj,.step,.stp,.3mf" style="display:none" />
             </label>
             <div class="file-chip-list" id="fileChipList"></div>
             <div class="form-error" id="fileError"></div>
@@ -2191,14 +2191,17 @@
       history.replaceState(null, '', window.location.pathname + window.location.hash);
     }
 
-    // ── Model file chips (supports multiple files + removal) ──
+    // ── Model file chip (single file only) ──
+    // FormSubmit only delivers the last file when several share one field
+    // name, so multi-file attachments silently dropped everything but the
+    // last pick. Capping this at one file guarantees whatever's shown here
+    // is exactly what gets emailed.
     var fileInput = form.querySelector('input[type="file"]');
     var fileChipList = document.getElementById('fileChipList');
     var fileError = document.getElementById('fileError');
     var selectedFiles = [];
 
-    var MAX_FILES = 5;
-    var MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+    var MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     var FILE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>';
 
@@ -2222,12 +2225,6 @@
     function clearFileError() {
       if (!fileError) return;
       fileError.classList.remove('is-visible');
-    }
-
-    function isDuplicate(file) {
-      return selectedFiles.some(function (f) {
-        return f.name === file.name && f.size === file.size;
-      });
     }
 
     function syncFileInput() {
@@ -2261,40 +2258,20 @@
       });
     }
 
-    // Adds newly-picked files to whatever's already selected instead of
-    // replacing it, so choosing files across multiple browse actions (or
-    // multi-selecting in one dialog) both work as "add", not "replace".
+    // Picking a new file always replaces whatever was selected before.
     function addFiles(newFiles) {
-      var rejectedOversize = [];
-      var rejectedDuplicate = 0;
-      var rejectedOverLimit = 0;
+      var file = newFiles[0];
+      if (!file) return;
 
-      Array.prototype.forEach.call(newFiles, function (file) {
-        if (selectedFiles.length >= MAX_FILES) {
-          rejectedOverLimit++;
-          return;
-        }
-        if (file.size > MAX_FILE_SIZE) {
-          rejectedOversize.push(file.name);
-          return;
-        }
-        if (isDuplicate(file)) {
-          rejectedDuplicate++;
-          return;
-        }
-        selectedFiles.push(file);
-      });
+      if (file.size > MAX_FILE_SIZE) {
+        showFileError(file.name + ' is over the 10MB limit and was skipped.');
+        return;
+      }
 
+      selectedFiles = [file];
       syncFileInput();
       renderChips();
-
-      if (rejectedOversize.length) {
-        showFileError(rejectedOversize.join(', ') + (rejectedOversize.length > 1 ? ' are' : ' is') + ' over the 10MB limit and ' + (rejectedOversize.length > 1 ? 'were' : 'was') + ' skipped.');
-      } else if (rejectedOverLimit) {
-        showFileError('Only ' + MAX_FILES + ' files allowed — ' + rejectedOverLimit + ' extra file' + (rejectedOverLimit > 1 ? 's' : '') + ' skipped.');
-      } else {
-        clearFileError();
-      }
+      clearFileError();
     }
 
     if (fileInput) {
