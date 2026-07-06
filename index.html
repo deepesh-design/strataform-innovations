@@ -200,21 +200,6 @@
 
     .nav-links a:not(.nav-cta):hover { opacity: 0.5; }
 
-    .nav-links a:not(.nav-cta).is-active {
-      color: var(--orange);
-      font-weight: 700;
-    }
-
-    .nav-links a:not(.nav-cta).is-active::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -8px;
-      height: 2px;
-      background: var(--orange);
-    }
-
     .nav-links a.nav-cta {
       padding: 12px 24px;
       font-size: 14px;
@@ -224,7 +209,6 @@
     }
 
     .nav-links a.nav-cta:hover { background: #333; }
-    .nav-links a.nav-cta.is-active { background: var(--orange); }
 
     /* ─── HAMBURGER + FULL-SCREEN MOBILE MENU ─── */
     .hamburger-btn {
@@ -309,15 +293,11 @@
       transition: color 0.18s ease;
     }
 
-    .mobile-menu-links a:not(.btn).is-active { color: var(--orange); }
-
     .mobile-menu-links a.btn {
       margin-top: 16px;
       font-size: 16px;
       color: #fff;
     }
-
-    .mobile-menu-links a.btn.is-active { background: var(--orange); }
 
     /* ─── BUTTONS (box shape, diagonal cut bottom-right) ─── */
     .btn {
@@ -751,7 +731,6 @@
     }
 
     .footer-nav a:hover { color: #fff; }
-    .footer-nav a.is-active { color: var(--orange); }
 
     .footer-copy { font-size: 13px; color: rgba(255,255,255,0.62); }
 
@@ -1989,59 +1968,6 @@
         history.pushState(null, '', '#' + target.id);
       });
     });
-  })();
-
-  // ─── NAV ACTIVE STATE (scrollspy) ───
-  // Highlights whichever nav item's section the user is currently in.
-  // Sections between two nav-linked anchors (e.g. Work/FAQ, which have no
-  // nav item of their own) stay attributed to the nav item right above them.
-  (function () {
-    var ids = ['services', 'process', 'materials', 'contact'];
-    var navbarOuter = document.querySelector('.navbar-outer');
-
-    function cumulativeOffsetTop(el) {
-      var top = 0;
-      while (el) {
-        top += el.offsetTop;
-        el = el.offsetParent;
-      }
-      return top;
-    }
-
-    var sections = ids.map(function (id) {
-      var el = document.getElementById(id);
-      return el ? { id: id, el: el, links: document.querySelectorAll('a[href="#' + id + '"]') } : null;
-    }).filter(Boolean);
-
-    if (!sections.length) return;
-
-    var ticking = false;
-
-    function updateActive() {
-      var navH = navbarOuter ? navbarOuter.getBoundingClientRect().height : 0;
-      var scrollPos = window.scrollY + navH + 24;
-      // Stays null while still in the hero, above the first section — no nav
-      // item should light up until the user actually reaches one.
-      var current = null;
-      sections.forEach(function (s) {
-        if (cumulativeOffsetTop(s.el) <= scrollPos) current = s;
-      });
-      sections.forEach(function (s) {
-        var isActive = s === current;
-        s.links.forEach(function (a) { a.classList.toggle('is-active', isActive); });
-      });
-      ticking = false;
-    }
-
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
-        requestAnimationFrame(updateActive);
-        ticking = true;
-      }
-    }, { passive: true });
-    window.addEventListener('resize', updateActive);
-    window.addEventListener('load', updateActive);
-    updateActive();
   })();
 
   // ─── HAMBURGER / FULL-SCREEN MOBILE MENU ───
