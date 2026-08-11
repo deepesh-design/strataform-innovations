@@ -466,64 +466,64 @@
       color: var(--muted);
     }
 
-    /* ─── ABOUT / DARK BG ─── */
-    .about-section {
+    /* ─── WHO WE ARE ─── */
+    .who-section {
       position: relative;
       min-height: 620px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      background: var(--ink);
     }
 
-    .about-bg-img {
+    .who-bg-img {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
-      filter: brightness(0.32);
+      filter: brightness(0.3);
     }
 
-    /* Wraps the tagline + card so the tagline sits outside, above, and left-aligned with the card */
-    .about-card-wrap {
+    .who-card-wrap {
       position: relative;
       z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      max-width: 600px;
-      width: 90%;
+      width: min(600px, 88%);
+      margin: 90px 0 60px;
     }
 
-    /* Card with a diagonal-cut bottom-right corner */
-    .about-card {
+    .who-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
       background: #fff;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
-      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 90px), calc(100% - 90px) 100%, 0 100%);
-      width: 100%;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 64px), calc(100% - 64px) 100%, 0 100%);
       text-align: left;
     }
 
-    .about-eyebrow {
-      display: inline-block;
-      width: fit-content;
+    .who-tag {
+      position: absolute;
+      top: 0;
+      left: 32px;
+      transform: translateY(-50%);
+      z-index: 3;
       background: var(--orange);
       color: var(--ink);
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      padding: 8px 16px;
+      padding: 10px 18px;
     }
 
-    .about-card-body {
-      padding: 40px 40px;
-      text-align: left;
+    .who-card-body {
+      padding: 40px 40px 36px;
     }
 
-    .about-card h2 {
+    .who-card h2 {
       font-size: 26px;
       font-weight: 800;
       letter-spacing: -0.6px;
@@ -531,71 +531,91 @@
       color: var(--ink);
     }
 
-    .about-card p {
-      font-size: 18px;
+    .who-card p {
+      font-size: 17px;
       line-height: 1.8;
       color: var(--muted);
-      margin-bottom: 32px;
     }
 
-    /* ─── PROJECTS ─── */
-    .projects-section { padding: 100px 0; background: #fff; }
+    /* ─── OUR WORK (pinned centre header, images sweep above it) ─── */
+    .work-section { position: relative; background: #fff; }
 
-    .projects-eyebrow {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--label);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .projects-section h2 {
-      font-size: 52px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      text-align: center;
-      margin-bottom: 72px;
-    }
-
-    /* Random-sized mosaic with per-tile scroll parallax */
-    .proj-masonry {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: 200px;
-      grid-auto-flow: dense;
-      gap: 40px;
-    }
-
-    .proj-tile {
+    /* Fallback for the instant before JS sizes it exactly (see the scroll-pin
+       controller) — the real height is set inline to match the grid's
+       actual content height so the pin never runs out of images to sweep
+       nor holds the header pinned over empty space once it has. */
+    .work-stack {
       position: relative;
-      overflow: hidden;
+      height: 340vh;
     }
 
-    .proj-tile img {
+    /* Pinned via JS — see the scroll-pin controller near the end of the file. */
+    .work-pin {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .proj-tile-caption {
+    .work-header {
       position: absolute;
-      right: 16px;
-      bottom: 16px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       z-index: 2;
-      max-width: 75%;
-      background: rgba(17,17,17,0.65);
-      color: #fff;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: -0.1px;
-      padding: 8px 16px;
+      width: 100%;
+      max-width: 640px;
+      padding: 0 24px;
+      text-align: center;
     }
+
+    .work-header .sec-eyebrow { text-align: center; }
+    .work-header h2 { font-size: 52px; font-weight: 800; letter-spacing: -2px; }
+
+    /* Sits above the header (z-index) and is translated as one block by JS
+       as the pin section scrolls, so the grid sweeps up and over the fixed
+       centred heading rather than the heading scrolling with it. */
+    .work-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px 80px;
+      padding: 0 8%;
+      align-items: start;
+      align-content: start;
+      will-change: transform;
+    }
+
+    .work-tile {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4 / 5;
+      background: var(--grey-bg);
+    }
+
+    .work-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Staggered vertical offsets so the grid reads as varied, not a rigid
+       table. transform (not margin-top) so the offset is purely visual and
+       never eats into the grid's own row-gap — margin-top was shrinking or
+       even closing the gap between rows depending on how much a tile shifted. */
+    .work-tile:nth-child(1) { transform: translateY(0); }
+    .work-tile:nth-child(2) { transform: translateY(90px); }
+    .work-tile:nth-child(3) { transform: translateY(-50px); }
+    .work-tile:nth-child(4) { transform: translateY(60px); }
+    .work-tile:nth-child(5) { transform: translateY(-30px); }
+    .work-tile:nth-child(6) { transform: translateY(100px); }
 
     /* ─── CONTACT ─── */
     .contact-section {
@@ -1181,6 +1201,19 @@
 
     .file-error.is-visible { display: block; }
 
+    .form-fallback-note {
+      font-size: 13px;
+      color: var(--label);
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .form-fallback-note a {
+      color: var(--ink);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
     .form-success {
       position: absolute;
       inset: 0;
@@ -1387,14 +1420,20 @@
       .hero-img-wrap { width: 88%; }
       .services-wrap { grid-template-columns: 1fr; }
       .svc-col { padding: 72px 0; }
-      .proj-masonry { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; gap: 24px; }
-      .proj-masonry .proj-tile { grid-column: span 1 !important; grid-row: span 1 !important; }
+      .work-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; padding: 0 6%; }
+      .work-tile:nth-child(1) { transform: translateY(0); }
+      .work-tile:nth-child(2) { transform: translateY(50px); }
+      .work-tile:nth-child(3) { transform: translateY(-30px); }
+      .work-tile:nth-child(4) { transform: translateY(35px); }
+      .work-tile:nth-child(5) { transform: translateY(-15px); }
+      .work-tile:nth-child(6) { transform: translateY(55px); }
+      .work-header h2 { font-size: 32px; }
       .contact-center { padding: 96px 0; }
       .contact-info-list--row { flex-direction: column; gap: 20px; }
       .contact-deco-img { display: none; }
-      .about-card { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 56px), calc(100% - 56px) 100%, 0 100%); }
-      .about-card-body { padding: 28px 24px 32px; }
-      .projects-section h2 { font-size: 34px; }
+      .who-card { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%); }
+      .who-card-wrap { width: 92%; }
+      .who-card-body { padding: 28px 24px 32px; }
 
       .sec-title { font-size: 30px; }
       .how-wrap { grid-template-columns: 1fr; gap: 32px; }
@@ -1423,6 +1462,7 @@
         transform: translateX(-50%);
         padding: 0;
       }
+      .contact-form-wrap form { padding: 24px; }
     }
   </style>
 </head>
@@ -1459,7 +1499,7 @@
         <li><a href="#services">Services</a></li>
         <li><a href="#process">Process</a></li>
         <li><a href="#materials">Materials</a></li>
-        <li><a href="/about">About Us</a></li>
+        <li><a href="#about">About Us</a></li>
         <li><a href="#contact" class="btn btn-primary nav-cta">Contact Us</a></li>
       </ul>
 
@@ -1479,7 +1519,7 @@
     <a href="#services">Services</a>
     <a href="#process">Process</a>
     <a href="#materials">Materials</a>
-    <a href="/about">About Us</a>
+    <a href="#about">About Us</a>
     <a href="#contact" class="btn btn-primary">Contact Us</a>
   </nav>
 </div>
@@ -1528,16 +1568,15 @@
  </div>
 </div>
 
-<!-- ════════════════ ABOUT (dark bg) ════════════════ -->
-<section class="about-section" id="about">
-  <img class="about-bg-img" src="images/Who we are bg img.webp" alt="3D printer in operation" />
-  <div class="about-card-wrap">
-    <div class="about-eyebrow">Who are we</div>
-    <div class="about-card">
-      <div class="about-card-body">
+<!-- ════════════════ WHO WE ARE (sticky stacking cards) ════════════════ -->
+<section class="who-section" id="about">
+  <img class="who-bg-img" src="images/Who we are bg img.webp" alt="3D printer in operation" />
+  <div class="who-card-wrap">
+    <div class="who-tag">Who are we</div>
+    <div class="who-card">
+      <div class="who-card-body">
         <h2>Strataform Innovations</h2>
-        <p>3D printing is a technology that turns a digital file into a real object. The material is added layer by layer, which makes it possible to create both simple and very complex shapes. The advantages are speed, precision and adaptability.</p>
-        <a href="/about" class="btn btn-secondary">Find out more</a>
+        <p>3D printing turns a digital file into a real object, added layer by layer — making it possible to create both simple and very complex shapes. Here's what that looks like in practice.</p>
       </div>
     </div>
   </div>
@@ -1603,39 +1642,25 @@
  </div>
 </section>
 
-<!-- ════════════════ PROJECTS / PORTFOLIO ════════════════ -->
-<section class="projects-section" id="work">
- <div class="container">
-  <div class="projects-eyebrow">Our Work</div>
-  <h2>Visual stories in innovation</h2>
+<!-- ════════════════ OUR WORK (pinned centre header, images sweep above it) ════════════════ -->
+<section class="work-section" id="work">
+  <div class="work-stack" id="workStack">
+    <div class="work-pin" id="workPin">
+      <div class="work-header">
+        <div class="sec-eyebrow">Our Work</div>
+        <h2>Visual stories in innovation</h2>
+      </div>
 
-  <div class="proj-masonry" id="projMasonry">
-    <div class="proj-tile" style="grid-column: span 2; grid-row: span 2;">
-      <img src="images/3d printing-gif.webp" alt="3D printer building an aero drone chassis" />
-      <div class="proj-tile-caption">Aero Drone Chassis</div>
-    </div>
-    <div class="proj-tile" style="grid-column: span 1; grid-row: span 1;">
-      <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80&auto=format&fit=crop" alt="Production run of sensor enclosures" />
-      <div class="proj-tile-caption">Sensor Enclosures</div>
-    </div>
-    <div class="proj-tile" style="grid-column: span 1; grid-row: span 2;">
-      <img src="images/3D modelling-img.avif" alt="Colorful sculptural vase series" />
-      <div class="proj-tile-caption">Sculptural Vase Series</div>
-    </div>
-    <div class="proj-tile" style="grid-column: span 1; grid-row: span 1;">
-      <img src="images/Strataform home page image.avif" alt="Anatomical study model" />
-      <div class="proj-tile-caption">Anatomical Study Model</div>
-    </div>
-    <div class="proj-tile" style="grid-column: span 2; grid-row: span 1;">
-      <img src="images/Filament spool.webp" alt="Materials for a soft robotics gripper" />
-      <div class="proj-tile-caption">Soft Robotics Gripper</div>
-    </div>
-    <div class="proj-tile" style="grid-column: span 1; grid-row: span 1;">
-      <img src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=600&q=80&auto=format&fit=crop" alt="Engineer reviewing a helical gear set" />
-      <div class="proj-tile-caption">Helical Gear Set</div>
+      <div class="work-grid" id="workGrid">
+        <div class="work-tile"><img src="images/3d printing-gif.webp" alt="3D printer building an aero drone chassis" /></div>
+        <div class="work-tile"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80&auto=format&fit=crop" alt="Production run of sensor enclosures" /></div>
+        <div class="work-tile"><img src="images/3D modelling-img.avif" alt="Colorful sculptural vase series" /></div>
+        <div class="work-tile"><img src="images/Strataform home page image.avif" alt="Anatomical study model" /></div>
+        <div class="work-tile"><img src="images/Filament spool.webp" alt="Materials for a soft robotics gripper" /></div>
+        <div class="work-tile"><img src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=600&q=80&auto=format&fit=crop" alt="Engineer reviewing a helical gear set" /></div>
+      </div>
     </div>
   </div>
- </div>
 </section>
 
 <!-- ════════════════ PRICING ════════════════ -->
@@ -1819,6 +1844,7 @@
           </div>
           <div class="form-error" id="formError">Please fill in all required fields before sending.</div>
           <button type="submit" class="btn btn-primary" style="margin-top:8px;">Send request →</button>
+          <p class="form-fallback-note">Form not going through? Email us directly at <a href="mailto:admin@strataform.in">admin@strataform.in</a>.</p>
         </form>
 
         <div class="form-success" id="formSuccess">
@@ -1841,7 +1867,7 @@
       <li><a href="#services">Services</a></li>
       <li><a href="#process">Process</a></li>
       <li><a href="#materials">Materials</a></li>
-      <li><a href="/about">About Us</a></li>
+      <li><a href="#about">About Us</a></li>
       <li><a href="#contact">Contact Us</a></li>
     </ul>
   </div>
@@ -2383,59 +2409,15 @@
         return;
       }
 
-      // FormSubmit's AJAX endpoint doesn't support file attachments, so when
-      // files are attached we let the real (non-AJAX) form submission go
-      // through instead — it POSTs to FormSubmit and redirects back here via
-      // _next, which the ?sent=true handler above picks up.
-      if (selectedFiles.length > 0) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending…';
-        return;
-      }
-
-      e.preventDefault();
-
-      var originalText = submitBtn.textContent;
+      // Let the browser submit the form for real (a plain multipart POST,
+      // not fetch/AJAX) — FormSubmit's `/ajax/` JSON endpoint was returning
+      // HTTP 500 for every request tested (any email, any payload, both
+      // FormData and JSON), while a real form POST is FormSubmit's primary,
+      // more robust integration path and isn't subject to the same CORS/
+      // fetch handling. It redirects back here via _next, which the
+      // ?sent=true handler above picks up and shows as success.
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending…';
-
-      var formData = new FormData(form);
-
-      fetch('https://formsubmit.co/ajax/admin@strataform.in', {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: formData
-      })
-        .then(function (res) {
-          if (!res.ok) throw new Error('Request failed');
-          return res.json();
-        })
-        .then(function (data) {
-          // FormSubmit always answers 200, even when it didn't actually send
-          // (e.g. the destination inbox hasn't clicked its one-time
-          // activation link yet) — the real outcome is in data.success.
-          if (data && (data.success === true || data.success === 'true')) {
-            showSuccess();
-            form.reset();
-            selectedFiles = [];
-            renderChips();
-            clearFileError();
-            resetServiceField();
-            resetAllFieldErrors();
-          } else {
-            errorBanner.textContent = (data && data.message) ||
-              'Something went wrong sending your request — please try again, or email us directly at admin@strataform.in.';
-            errorBanner.classList.add('is-visible');
-          }
-        })
-        .catch(function () {
-          errorBanner.textContent = 'Something went wrong sending your request — please try again, or email us directly at admin@strataform.in.';
-          errorBanner.classList.add('is-visible');
-        })
-        .finally(function () {
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-        });
     });
   })();
 
@@ -2454,18 +2436,67 @@
     });
   })();
 
-  // ─── PROJECTS MASONRY: random order ───
+  // ─── SCROLL-PIN CONTROLLER (Our-Work image sweep) ───
+  // Reads getBoundingClientRect() each frame rather than using
+  // position:sticky — #luxy already applies its own eased inertia transform
+  // to everything, so a native sticky calculation (which reacts to the
+  // instant scroll position) would visibly drift against the eased content
+  // around it. getBoundingClientRect() reports the true post-transform
+  // position, so math built on it always stays in lockstep with what's on
+  // screen.
   (function () {
-    var grid = document.getElementById('projMasonry');
-    if (!grid) return;
-    var tiles = Array.prototype.slice.call(grid.querySelectorAll('.proj-tile'));
+    var workStack = document.getElementById('workStack');
+    var workPin = document.getElementById('workPin');
+    var workGrid = document.getElementById('workGrid');
 
-    // Shuffle into a random order on each load (Fisher-Yates)
-    for (var i = tiles.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = tiles[i]; tiles[i] = tiles[j]; tiles[j] = tmp;
+    if (!workStack || !workPin || !workGrid) return;
+
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    // The pin only needs (vh + contentH) of scroll distance to sweep the
+    // grid fully in and back out; stackHeight is that plus one more vh to
+    // hold the pin in place before the sweep starts. Sizing it exactly
+    // (instead of the CSS fallback's fixed 340vh) means the header is never
+    // held pinned over empty space once the images have already left.
+    function sizeWorkStack() {
+      var vh = window.innerHeight;
+      workStack.style.height = (vh * 2 + workGrid.scrollHeight) + 'px';
     }
-    tiles.forEach(function (tile) { grid.appendChild(tile); });
+    sizeWorkStack();
+    window.addEventListener('resize', sizeWorkStack);
+
+    // Translates pinEl down by exactly how far stackEl has scrolled,
+    // canceling its natural upward motion so it holds its screen position
+    // for the whole track, then releases smoothly once the track runs out.
+    // Returns 0–1 progress through the track.
+    function updatePin(stackEl, pinEl) {
+      var vh = window.innerHeight;
+      var rect = stackEl.getBoundingClientRect();
+      var total = Math.max(0, rect.height - vh);
+      var raw = -rect.top;
+      var offset = clamp(raw, 0, total);
+      pinEl.style.transform = 'translateY(' + offset + 'px)';
+      return total > 0 ? clamp(raw / total, 0, 1) : (raw > 0 ? 1 : 0);
+    }
+
+    function updateWork() {
+      var progress = updatePin(workStack, workPin);
+      var vh = window.innerHeight;
+      // scrollHeight is the grid's true (untransformed) content height, so
+      // the sweep always covers exactly enough distance to bring the grid
+      // in from below and clear it off the top — however tall the grid
+      // ends up being at the current breakpoint/gap values, instead of a
+      // fixed guess that drifts out of sync with the real content.
+      var contentH = workGrid.scrollHeight;
+      var y = vh - progress * (vh + contentH);
+      workGrid.style.transform = 'translateY(' + y + 'px)';
+    }
+
+    function loop() {
+      updateWork();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
   })();
 </script>
 
