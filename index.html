@@ -1646,7 +1646,7 @@
 <section class="work-section" id="work">
   <div class="work-stack" id="workStack">
     <div class="work-pin" id="workPin">
-      <div class="work-header">
+      <div class="work-header" id="workHeader">
         <div class="sec-eyebrow">Our Work</div>
         <h2>Visual stories in innovation</h2>
       </div>
@@ -2448,6 +2448,7 @@
     var workStack = document.getElementById('workStack');
     var workPin = document.getElementById('workPin');
     var workGrid = document.getElementById('workGrid');
+    var workHeader = document.getElementById('workHeader');
 
     if (!workStack || !workPin || !workGrid) return;
 
@@ -2490,6 +2491,20 @@
       var contentH = workGrid.scrollHeight;
       var y = vh - progress * (vh + contentH);
       workGrid.style.transform = 'translateY(' + y + 'px)';
+
+      // The header sits pinned at screen centre while rows sweep past it —
+      // but once the last row's bottom edge rises above that centre line,
+      // there's nothing left passing behind the header for the rest of the
+      // track, and holding it frozen there reads as a dead pause before the
+      // release. So from that instant on, walk the header up by exactly
+      // however much further the grid still has left to travel, so it
+      // rides out with the tail of the sweep instead of sitting still.
+      if (workHeader) {
+        var gridBottom = y + contentH;
+        var headerCenter = vh / 2;
+        var excess = Math.max(0, headerCenter - gridBottom);
+        workHeader.style.transform = 'translate(-50%, -50%) translateY(-' + excess + 'px)';
+      }
     }
 
     function loop() {
