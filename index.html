@@ -1786,7 +1786,7 @@
       <img class="contact-deco-img" src="images/Filament spool.webp" alt="Filament spool" />
 
       <div class="contact-form-inner">
-        <form id="contactForm" action="https://formsubmit.co/admin@strataform.in" method="POST" enctype="multipart/form-data">
+        <form id="contactForm" action="https://formsubmit.co/admin@strataform.in" method="POST" enctype="multipart/form-data" target="strataform_verify">
           <input type="hidden" name="_subject" value="New project request — Strataform website" />
           <input type="hidden" name="_template" value="table" />
           <input type="hidden" name="_next" value="https://strataform.in/?sent=true#contact" />
@@ -2209,11 +2209,54 @@
       success.classList.add('is-visible');
     }
 
-    // Progressive-enhancement fallback: if JS submission below never runs
-    // (e.g. fetch blocked), the plain form POST still works and FormSubmit
-    // redirects back here with ?sent=true once the email is actually sent.
-    if (/[?&]sent=true\b/.test(window.location.search)) {
+    function finishSubmission() {
       showSuccess();
+      form.reset();
+      selectedFiles = [];
+      renderChips();
+      clearFileError();
+      resetServiceField();
+      resetAllFieldErrors();
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send request →';
+    }
+
+    // Called by the popup tab (see below) once FormSubmit has actually sent
+    // the email and redirected back to our own ?sent=true page — lets this,
+    // the main tab, show success and reset the form without ever navigating
+    // away itself. The popup closes itself; we don't hold a handle to it.
+    window.__strataformContactSent = function () {
+      awaitingVerification = false;
+      finishSubmission();
+    };
+
+    var awaitingVerification = false;
+
+    // If the verification tab is closed (by us, above, or manually by the
+    // visitor) before it ever calls back, focus returns to this tab — use
+    // that as the signal to stop waiting and let them retry.
+    window.addEventListener('focus', function () {
+      if (awaitingVerification && !success.classList.contains('is-visible')) {
+        awaitingVerification = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send request →';
+      }
+    });
+
+    // Progressive-enhancement fallback: if this page itself is the one that
+    // got redirected back to (e.g. no popup, or JS in the popup never ran),
+    // the plain form POST still works and FormSubmit redirects here with
+    // ?sent=true once the email is actually sent.
+    if (/[?&]sent=true\b/.test(window.location.search)) {
+      // If we were opened as the verification popup, hand off to the tab
+      // that opened us and close ourselves instead of showing success here.
+      if (window.opener && !window.opener.closed && window.opener.__strataformContactSent) {
+        window.opener.__strataformContactSent();
+        window.opener.focus();
+        window.close();
+      } else {
+        showSuccess();
+      }
       history.replaceState(null, '', window.location.pathname + window.location.hash);
     }
 
@@ -2390,13 +2433,7 @@
       // has a value, silently pretend success instead of actually sending.
       if (honeyInput && honeyInput.value) {
         e.preventDefault();
-        showSuccess();
-        form.reset();
-        selectedFiles = [];
-        renderChips();
-        clearFileError();
-        resetServiceField();
-        resetAllFieldErrors();
+        finishSubmission();
         return;
       }
 
@@ -2415,9 +2452,18 @@
       // FormData and JSON), while a real form POST is FormSubmit's primary,
       // more robust integration path and isn't subject to the same CORS/
       // fetch handling. It redirects back here via _next, which the
-      // ?sent=true handler above picks up and shows as success.
+      // ?sent=true handler above picks up.
+      //
+      // The form's target="strataform_verify" sends that whole flow into a
+      // separate tab so this page never navigates away — left to the native
+      // target attribute rather than a JS window.open() call, since popup
+      // blockers routinely block the latter even from a submit handler.
+      // When the popup lands back on our own ?sent=true page it calls
+      // __strataformContactSent() on this tab and closes itself; the
+      // focus-listener above handles it being closed early instead.
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending…';
+      awaitingVerification = true;
     });
   })();
 
