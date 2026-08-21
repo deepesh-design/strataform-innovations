@@ -2221,16 +2221,18 @@
       submitBtn.textContent = 'Send request →';
     }
 
-    // Called by the popup tab (see below) once FormSubmit has actually sent
-    // the email and redirected back to our own ?sent=true page — lets this,
-    // the main tab, show success and reset the form without ever navigating
-    // away itself. The popup closes itself; we don't hold a handle to it.
+    // Called by the popup (see below) once FormSubmit has actually sent the
+    // email and redirected back to our own ?sent=true page — lets this, the
+    // main tab, show success and reset the form without ever navigating
+    // away itself.
     window.__strataformContactSent = function () {
       awaitingVerification = false;
       finishSubmission();
+      if (verifyWindow && !verifyWindow.closed) verifyWindow.close();
     };
 
     var awaitingVerification = false;
+    var verifyWindow = null;
 
     // If the verification tab is closed (by us, above, or manually by the
     // visitor) before it ever calls back, focus returns to this tab — use
@@ -2451,16 +2453,26 @@
       // HTTP 500 for every request tested (any email, any payload, both
       // FormData and JSON), while a real form POST is FormSubmit's primary,
       // more robust integration path and isn't subject to the same CORS/
-      // fetch handling. It redirects back here via _next, which the
-      // ?sent=true handler above picks up.
+      // fetch handling.
       //
-      // The form's target="strataform_verify" sends that whole flow into a
-      // separate tab so this page never navigates away — left to the native
-      // target attribute rather than a JS window.open() call, since popup
-      // blockers routinely block the latter even from a submit handler.
-      // When the popup lands back on our own ?sent=true page it calls
-      // __strataformContactSent() on this tab and closes itself; the
-      // focus-listener above handles it being closed early instead.
+      // FormSubmit's own captcha step (and, the first time a new address is
+      // used, its "confirm this email" step) is served as the direct
+      // response to this POST — it's not a URL we can pre-open, so it has
+      // to land wherever this submission's target sends it. A plain
+      // target="strataform_verify" attribute wasn't enough to keep that
+      // response out of this tab, so open a real, explicitly sized popup
+      // window right here — sized windows are treated as genuine popups
+      // rather than folded into a background tab, and calling window.open()
+      // as the direct, synchronous result of the click is what keeps popup
+      // blockers from killing it. The form's target still matches this
+      // window's name, so the POST lands inside it.
+      var popupFeatures = 'width=520,height=680,resizable=yes,scrollbars=yes';
+      verifyWindow = window.open('', 'strataform_verify', popupFeatures);
+      // If the popup got blocked anyway, fall back to the plain
+      // target="strataform_verify" attribute on the form, which most
+      // browsers still honor as a real tab open since it's the direct
+      // result of the user's own form submission rather than a script call.
+
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending…';
       awaitingVerification = true;
