@@ -592,18 +592,18 @@
       will-change: transform;
     }
 
+    /* Each tile takes on its image's own intrinsic proportions rather than
+       a forced crop, so a square render stays square and a wide banner
+       stays wide — a true masonry read instead of a uniform grid. */
     .work-tile {
       position: relative;
-      overflow: hidden;
-      aspect-ratio: 4 / 5;
       background: var(--grey-bg);
     }
 
     .work-tile img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
       display: block;
+      width: 100%;
+      height: auto;
     }
 
     /* Staggered vertical offsets so the grid reads as varied, not a rigid
@@ -616,7 +616,6 @@
     .work-tile:nth-child(4) { transform: translateY(60px); }
     .work-tile:nth-child(5) { transform: translateY(-30px); }
     .work-tile:nth-child(6) { transform: translateY(100px); }
-    .work-tile:nth-child(7) { transform: translateY(20px); }
 
     /* ─── CONTACT ─── */
     .contact-section {
@@ -1428,7 +1427,6 @@
       .work-tile:nth-child(4) { transform: translateY(35px); }
       .work-tile:nth-child(5) { transform: translateY(-15px); }
       .work-tile:nth-child(6) { transform: translateY(55px); }
-      .work-tile:nth-child(7) { transform: translateY(-20px); }
       .work-header h2 { font-size: 32px; }
       .contact-center { padding: 96px 0; }
       .contact-info-list--row { flex-direction: column; gap: 20px; }
@@ -1654,13 +1652,12 @@
       </div>
 
       <div class="work-grid" id="workGrid">
-        <div class="work-tile"><img src="images/3d printing-gif.webp" alt="3D printer building an aero drone chassis" /></div>
-        <div class="work-tile"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80&auto=format&fit=crop" alt="Production run of sensor enclosures" /></div>
-        <div class="work-tile"><img src="images/3D modelling-img.avif" alt="Colorful sculptural vase series" /></div>
-        <div class="work-tile"><img src="images/Strataform home page image.avif" alt="Anatomical study model" /></div>
-        <div class="work-tile"><img src="images/Filament spool.webp" alt="Materials for a soft robotics gripper" /></div>
-        <div class="work-tile"><img src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=600&q=80&auto=format&fit=crop" alt="Engineer reviewing a helical gear set" /></div>
-        <div class="work-tile"><img src="images/Lion mask carving.webp" alt="Ornately carved lion mask 3D model" /></div>
+        <div class="work-tile"><img src="images/Lion mask carving.png" alt="Ornately carved lion mask 3D model" /></div>
+        <div class="work-tile"><img src="images/Production run.png" alt="Production run of sensor enclosures" /></div>
+        <div class="work-tile"><img src="images/3D modelling.png" alt="Colorful sculptural vase series" /></div>
+        <div class="work-tile"><img src="images/Strataform home page image.png" alt="Anatomical study model" /></div>
+        <div class="work-tile"><img src="images/Filament spool.png" alt="Materials for a soft robotics gripper" /></div>
+        <div class="work-tile"><img src="images/Gear engineer.png" alt="Engineer reviewing a helical gear set" /></div>
       </div>
     </div>
   </div>
